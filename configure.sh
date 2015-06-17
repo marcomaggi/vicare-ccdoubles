@@ -16,7 +16,6 @@ fi
     --cache-file=../config.cache                \
     --prefix="${prefix}"                        \
     --libdir="${libdir}"			\
-    --enable-debug                              \
     --enable-time-tests				\
     VFLAGS='-O3'				\
     "$@"

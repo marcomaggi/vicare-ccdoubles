@@ -218,11 +218,14 @@ to the @value{FOREIGN_PACKAGE}'s documentation for details.
 
 
 The library @value{FOREIGN_SCHEME_LIB} implements the high level @api{}
-for @value{FOREIGN_PACKAGE}.  All the functions not described in this
-chapter have the same @api{} of the corresponding C function.
+for @value{FOREIGN_PACKAGE}.  All the indexes are zero--based.
 
 @menu
 * plain version::               @value{PACKAGE} version informations.
+* plain rvec::                  Real vectors of flonums.
+* plain cvec::                  Complex vectors of flonums.
+* plain rmat::                  Real matrices of flonums.
+* plain cmat::                  Complex matrices of flonums.
 @end menu
 
 @c page
@@ -248,6 +251,697 @@ Return a fixnum representing a version number.
 
 @defun ccdoubles-version-string
 Return a Scheme string representing the version number.
+@end defun
+
+@c page
+@node plain rvec
+@section Real vectors of flonums
+
+
+@menu
+* plain rvec struct::           Real vector data type.
+* plain rvec init::             Initialisation and finalisation.
+* plain rvec access::           Setters and getters.
+@end menu
+
+@c page
+@node plain rvec struct
+@subsection Real vector data type
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@deftp {Struct Type} ccdoubles-real-vector
+@cindex Argument @var{rvec}
+@cindex @var{rvec} argument
+Opaque structure type referencing a data area holding @samp{double}
+precision flonums.  Unless otherwise specified, when instances of this
+type are used as arguments to functions: this documentation identifies
+them as @var{rvec}.
+
+Instances of this type must be finalised with
+@func{ccdoubles-real-vector-finalise}; whenever an instance of this type
+is garbage collected: @func{ccdoubles-real-vector-finalise} is
+automatically applied to it and any error ignored.
+
+In certain contexts, instances of this type own the underlying data
+area, in other contexts they do not:
+
+@itemize
+@item
+Finalising a @objtype{ccdoubles-real-vector} instance owning the data
+area, causes finalisation of the data area too.
+
+@item
+Finalising a @objtype{ccdoubles-real-vector} instance @strong{not}
+owning the data area, leaves the data area untouched.
+@end itemize
+
+@noindent
+this should happen transparently.
+@end deftp
+
+
+@defun ccdoubles-real-vector? @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-real-vector}; otherwise return @false{}.
+@end defun
+
+
+@defun ccdoubles-real-vector?/alive @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-real-vector} and it has not been finalised; return
+@false{} otherwise.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Object properties
+
+
+@defun ccdoubles-real-vector-putprop @var{rvec} @var{key} @var{value}
+Add a new property @var{key} to the property list of @var{rvec};
+@var{key} must be a symbol.  If @var{key} is already set: the old entry
+is mutated to reference the new @var{value}.
+@end defun
+
+
+@defun ccdoubles-real-vector-getprop @var{rvec} @var{key}
+Return the value of the property @var{key} in the property list of
+@var{rvec}; if @var{key} is not set: return @false{}.  @var{key} must
+be a symbol.
+@end defun
+
+
+@defun ccdoubles-real-vector-remprop @var{rvec} @var{key}
+Remove the property @var{key} from the property list of @var{rvec}; if
+@var{key} is not set: nothing happens.  @var{key} must be a symbol.
+@end defun
+
+
+@defun ccdoubles-real-vector-property-list @var{rvec}
+Return a new association list representing the property list of
+@var{rvec}.  The order of the entries is the same as the property
+creation order.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Custom destructor
+
+
+@defun alpha-custom-destructor @var{rvec}
+@defunx set-alpha-custom-destructor! @var{rvec} @var{func}
+Retrieve or set a destructor function associated to @var{rvec}.
+
+Whenever @var{rvec} is finalised, either explicitly with
+@func{ccdoubles-real-vector-finalise} or implicitly by the garbage
+collector, @var{func} is applied to @var{rvec} before the internal state
+of @var{rvec} is destroyed.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Other operations
+
+
+@defun ccdoubles-real-vector-hash @var{rvec}
+Return an exact integer to be used as hashtable key for @var{rvec}.
+Hashtables having a @objtype{ccdoubles-real-vector} as key can be instantiated
+as follows:
+
+@example
+(make-hashtable ccdoubles-real-vector-hash eq?)
+@end example
+@end defun
+
+@c page
+@node plain rvec init
+@subsection Initialisation and finalisation
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector-initialise @var{nslots}
+Build and return a new @objtype{ccdoubles-real-vector} object; if an
+error occurs raise an exception.  @var{nslots} must be a non--negative
+fixnum representing the number of slots.
+@end defun
+
+
+@defun ccdoubles-real-vector-finalise @var{rvec}
+Finalise @var{rvec}; return unspecified values.  It is fine to apply
+this function multiple times to the same @var{rvec} value: the first
+time the underlying data is finalised, the subsequent times nothing
+happens.
+
+If this function is applied to an @var{rvec} value not owning the
+underlying data area: @var{rvec} is finalised, but the data area is left
+alone.
+@end defun
+
+@c page
+@node plain rvec access
+@subsection Setters and getters
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector-ref @var{rvec} @var{idx}
+Return a flonum object representing the value in the slot at index
+@var{idx}.  If an error occurs: raise an exception.
+@end defun
+
+
+@defun ccdoubles-real-vector-set! @var{rvec} @var{idx} @var{flo}
+Store the flonum object @var{flo} in the slot at index @var{idx},
+overwriting the old value.  If an error occurs: raise an exception.
+@end defun
+
+@c page
+@node plain cvec
+@section Complex vectors of flonums
+
+
+@menu
+* plain cvec struct::           Complex vector data type.
+* plain cvec init::             Initialisation and finalisation.
+* plain cvec access::           Setters and getters.
+@end menu
+
+@c page
+@node plain cvec struct
+@subsection Complex vector data type
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@deftp {Struct Type} ccdoubles-cplx-vector
+@cindex Argument @var{cvec}
+@cindex @var{cvec} argument
+Opaque structure type referencing a data area holding @samp{double}
+precision flonums representing complex numbers.  Unless otherwise
+specified, when instances of this type are used as arguments to
+functions: this documentation identifies them as @var{cvec}.
+
+Instances of this type must be finalised with
+@func{ccdoubles-cplx-vector-finalise}; whenever an instance of this type
+is garbage collected: @func{ccdoubles-cplx-vector-finalise} is
+automatically applied to it and any error ignored.
+
+In certain contexts, instances of this type own the underlying data
+area, in other contexts they do not:
+
+@itemize
+@item
+Finalising a @objtype{ccdoubles-cplx-vector} instance owning the data
+area, causes finalisation of the data area too.
+
+@item
+Finalising a @objtype{ccdoubles-cplx-vector} instance @strong{not}
+owning the data area, leaves the data area untouched.
+@end itemize
+
+@noindent
+this should happen transparently.
+@end deftp
+
+
+@defun ccdoubles-cplx-vector? @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-cplx-vector}; otherwise return @false{}.
+@end defun
+
+
+@defun ccdoubles-cplx-vector?/alive @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-cplx-vector} and it has not been finalised; return
+@false{} otherwise.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Object properties
+
+
+@defun ccdoubles-cplx-vector-putprop @var{cvec} @var{key} @var{value}
+Add a new property @var{key} to the property list of @var{cvec};
+@var{key} must be a symbol.  If @var{key} is already set: the old entry
+is mutated to reference the new @var{value}.
+@end defun
+
+
+@defun ccdoubles-cplx-vector-getprop @var{cvec} @var{key}
+Return the value of the property @var{key} in the property list of
+@var{cvec}; if @var{key} is not set: return @false{}.  @var{key} must
+be a symbol.
+@end defun
+
+
+@defun ccdoubles-cplx-vector-remprop @var{cvec} @var{key}
+Remove the property @var{key} from the property list of @var{cvec}; if
+@var{key} is not set: nothing happens.  @var{key} must be a symbol.
+@end defun
+
+
+@defun ccdoubles-cplx-vector-property-list @var{cvec}
+Return a new association list representing the property list of
+@var{cvec}.  The order of the entries is the same as the property
+creation order.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Custom destructor
+
+
+@defun alpha-custom-destructor @var{cvec}
+@defunx set-alpha-custom-destructor! @var{cvec} @var{func}
+Retrieve or set a destructor function associated to @var{cvec}.
+
+Whenever @var{cvec} is finalised, either explicitly with
+@func{ccdoubles-cplx-vector-finalise} or implicitly by the garbage
+collector, @var{func} is applied to @var{cvec} before the internal state
+of @var{cvec} is destroyed.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Other operations
+
+
+@defun ccdoubles-cplx-vector-hash @var{cvec}
+Return an exact integer to be used as hashtable key for @var{cvec}.
+Hashtables having a @objtype{ccdoubles-cplx-vector} as key can be instantiated
+as follows:
+
+@example
+(make-hashtable ccdoubles-cplx-vector-hash eq?)
+@end example
+@end defun
+
+@c page
+@node plain cvec init
+@subsection Initialisation and finalisation
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-cplx-vector-initialise @var{nslots}
+Build and return a new @objtype{ccdoubles-cplx-vector} object; if an
+error occurs raise an exception.  @var{nslots} must be a non--negative
+fixnum representing the number of slots.
+@end defun
+
+
+@defun ccdoubles-cplx-vector-finalise @var{cvec}
+Finalise @var{cvec}; return unspecified values.  It is fine to apply
+this function multiple times to the same @var{cvec} value: the first
+time the underlying data is finalised, the subsequent times nothing
+happens.
+
+If this function is applied to an @var{cvec} value not owning the
+underlying data area: @var{cvec} is finalised, but the data area is left
+alone.
+@end defun
+
+@c page
+@node plain cvec access
+@subsection Setters and getters
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector-ref @var{cvec} @var{idx}
+Return a cflonum object representing the value in the slot at index
+@var{idx}.  If an error occurs: raise an exception.
+@end defun
+
+
+@defun ccdoubles-real-vector-set! @var{cvec} @var{idx} @var{cnum}
+Store the complex number object @var{cnum} in the slot at index
+@var{idx}, overwriting the old value.  If an error occurs: raise an
+exception.
+@end defun
+
+@c page
+@node plain rmat
+@section Real matrices of flonums
+
+
+@menu
+* plain rmat struct::           Real matrix data type.
+* plain rmat init::             Initialisation and finalisation.
+* plain rmat access::           Setters and getters.
+@end menu
+
+@c page
+@node plain rmat struct
+@subsection Real matrix data type
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@deftp {Struct Type} ccdoubles-real-matrix
+@cindex Argument @var{rmat}
+@cindex @var{rmat} argument
+Opaque structure type referencing a data area holding @samp{double}
+precision flonums; every instance of this type represents a matrix in
+row--major order.  Unless otherwise specified, when instances of this
+type are used as arguments to functions: this documentation identifies
+them as @var{rmat}.
+
+Instances of this type must be finalised with
+@func{ccdoubles-real-matrix-finalise}; whenever an instance of this type
+is garbage collected: @func{ccdoubles-real-matrix-finalise} is
+automatically applied to it and any error ignored.
+
+In certain contexts, instances of this type own the underlying data
+area, in other contexts they do not:
+
+@itemize
+@item
+Finalising a @objtype{ccdoubles-real-matrix} instance owning the data
+area, causes finalisation of the data area too.
+
+@item
+Finalising a @objtype{ccdoubles-real-matrix} instance @strong{not}
+owning the data area, leaves the data area untouched.
+@end itemize
+
+@noindent
+this should happen transparently.
+@end deftp
+
+
+@defun ccdoubles-real-matrix? @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-real-matrix}; otherwise return @false{}.
+@end defun
+
+
+@defun ccdoubles-real-matrix?/alive @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-real-matrix} and it has not been finalised; return
+@false{} otherwise.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Object properties
+
+
+@defun ccdoubles-real-matrix-putprop @var{rmat} @var{key} @var{value}
+Add a new property @var{key} to the property list of @var{rmat};
+@var{key} must be a symbol.  If @var{key} is already set: the old entry
+is mutated to reference the new @var{value}.
+@end defun
+
+
+@defun ccdoubles-real-matrix-getprop @var{rmat} @var{key}
+Return the value of the property @var{key} in the property list of
+@var{rmat}; if @var{key} is not set: return @false{}.  @var{key} must
+be a symbol.
+@end defun
+
+
+@defun ccdoubles-real-matrix-remprop @var{rmat} @var{key}
+Remove the property @var{key} from the property list of @var{rmat}; if
+@var{key} is not set: nothing happens.  @var{key} must be a symbol.
+@end defun
+
+
+@defun ccdoubles-real-matrix-property-list @var{rmat}
+Return a new association list representing the property list of
+@var{rmat}.  The order of the entries is the same as the property
+creation order.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Custom destructor
+
+
+@defun alpha-custom-destructor @var{rmat}
+@defunx set-alpha-custom-destructor! @var{rmat} @var{func}
+Retrieve or set a destructor function associated to @var{rmat}.
+
+Whenever @var{rmat} is finalised, either explicitly with
+@func{ccdoubles-real-matrix-finalise} or implicitly by the garbage
+collector, @var{func} is applied to @var{rmat} before the internal state
+of @var{rmat} is destroyed.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Other operations
+
+
+@defun ccdoubles-real-matrix-hash @var{rmat}
+Return an exact integer to be used as hashtable key for @var{rmat}.
+Hashtables having a @objtype{ccdoubles-real-matrix} as key can be instantiated
+as follows:
+
+@example
+(make-hashtable ccdoubles-real-matrix-hash eq?)
+@end example
+@end defun
+
+@c page
+@node plain rmat init
+@subsection Initialisation and finalisation
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-matrix-initialise @var{nrows} @var{ncols}
+Build and return a new @objtype{ccdoubles-real-matrix} object; if an
+error occurs raise an exception.  @var{nrows} and @var{ncols} must be a
+non--negative fixnums representing the number of rows and columns.
+@end defun
+
+
+@defun ccdoubles-real-matrix-finalise @var{rmat}
+Finalise @var{rmat}; return unspecified values.  It is fine to apply
+this function multiple times to the same @var{rmat} value: the first
+time the underlying data is finalised, the subsequent times nothing
+happens.
+
+If this function is applied to an @var{rmat} value not owning the
+underlying data area: @var{rmat} is finalised, but the data area is left
+alone.
+@end defun
+
+@c page
+@node plain rmat access
+@subsection Setters and getters
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector-ref @var{rmat} @var{row} @var{col}
+Return a flonum object representing the value in the slot at row index
+@var{row} and column index @var{col}.  If an error occurs: raise an
+exception.
+@end defun
+
+
+@defun ccdoubles-real-vector-set! @var{rmat} @var{row} @var{col} @var{flo}
+Store the flonum object @var{flo} in the slot at row index @var{row} and
+column index @var{col}, overwriting the old value.  If an error occurs:
+raise an exception.
+@end defun
+
+@c page
+@node plain cmat
+@section Complex matrices of flonums
+
+
+@menu
+* plain cmat struct::           Complex matrix data type.
+* plain cmat init::             Initialisation and finalisation.
+* plain cmat access::           Setters and getters.
+@end menu
+
+@c page
+@node plain cmat struct
+@subsection Complex matrix data type
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@deftp {Struct Type} ccdoubles-cplx-matrix
+@cindex Argument @var{cmat}
+@cindex @var{cmat} argument
+Opaque structure type referencing a data area holding @samp{double}
+precision flonums representing complex numbers; every instance of this
+type represents a matrix in row--major order.  Unless otherwise
+specified, when instances of this type are used as arguments to
+functions: this documentation identifies them as @var{cmat}.
+
+Instances of this type must be finalised with
+@func{ccdoubles-cplx-matrix-finalise}; whenever an instance of this type
+is garbage collected: @func{ccdoubles-cplx-matrix-finalise} is
+automatically applied to it and any error ignored.
+
+In certain contexts, instances of this type own the underlying data
+area, in other contexts they do not:
+
+@itemize
+@item
+Finalising a @objtype{ccdoubles-cplx-matrix} instance owning the data
+area, causes finalisation of the data area too.
+
+@item
+Finalising a @objtype{ccdoubles-cplx-matrix} instance @strong{not}
+owning the data area, leaves the data area untouched.
+@end itemize
+
+@noindent
+this should happen transparently.
+@end deftp
+
+
+@defun ccdoubles-cplx-matrix? @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-cplx-matrix}; otherwise return @false{}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix?/alive @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-cplx-matrix} and it has not been finalised; return
+@false{} otherwise.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Object properties
+
+
+@defun ccdoubles-cplx-matrix-putprop @var{cmat} @var{key} @var{value}
+Add a new property @var{key} to the property list of @var{cmat};
+@var{key} must be a symbol.  If @var{key} is already set: the old entry
+is mutated to reference the new @var{value}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-getprop @var{cmat} @var{key}
+Return the value of the property @var{key} in the property list of
+@var{cmat}; if @var{key} is not set: return @false{}.  @var{key} must
+be a symbol.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-remprop @var{cmat} @var{key}
+Remove the property @var{key} from the property list of @var{cmat}; if
+@var{key} is not set: nothing happens.  @var{key} must be a symbol.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-property-list @var{cmat}
+Return a new association list representing the property list of
+@var{cmat}.  The order of the entries is the same as the property
+creation order.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Custom destructor
+
+
+@defun alpha-custom-destructor @var{cmat}
+@defunx set-alpha-custom-destructor! @var{cmat} @var{func}
+Retrieve or set a destructor function associated to @var{cmat}.
+
+Whenever @var{cmat} is finalised, either explicitly with
+@func{ccdoubles-cplx-matrix-finalise} or implicitly by the garbage
+collector, @var{func} is applied to @var{cmat} before the internal state
+of @var{cmat} is destroyed.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Other operations
+
+
+@defun ccdoubles-cplx-matrix-hash @var{cmat}
+Return an exact integer to be used as hashtable key for @var{cmat}.
+Hashtables having a @objtype{ccdoubles-cplx-matrix} as key can be instantiated
+as follows:
+
+@example
+(make-hashtable ccdoubles-cplx-matrix-hash eq?)
+@end example
+@end defun
+
+@c page
+@node plain cmat init
+@subsection Initialisation and finalisation
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-cplx-matrix-initialise @var{nrows} @var{ncols}
+Build and return a new @objtype{ccdoubles-cplx-matrix} object; if an
+error occurs raise an exception.  @var{nrows} and @var{ncols} must be a
+non--negative fixnums representing the number of rows and columns.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-finalise @var{cmat}
+Finalise @var{cmat}; return unspecified values.  It is fine to apply
+this function multiple times to the same @var{cmat} value: the first
+time the underlying data is finalised, the subsequent times nothing
+happens.
+
+If this function is applied to an @var{cmat} value not owning the
+underlying data area: @var{cmat} is finalised, but the data area is left
+alone.
+@end defun
+
+@c page
+@node plain cmat access
+@subsection Setters and getters
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector-ref @var{cmat} @var{row} @var{col}
+Return a flonum object representing the value in the slot at row index
+@var{row} and column index @var{col}.  If an error occurs: raise an
+exception.
+@end defun
+
+
+@defun ccdoubles-real-vector-set! @var{cmat} @var{row} @var{col} @var{flo}
+Store the flonum object @var{flo} in the slot at row index @var{row} and
+column index @var{col}, overwriting the old value.  If an error occurs:
+raise an exception.
 @end defun
 
 @c page

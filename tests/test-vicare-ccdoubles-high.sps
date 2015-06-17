@@ -36,127 +36,6 @@
 (check-display "*** testing Vicare CCDoubles bindings\n")
 
 
-;;;; generic helpers
-
-(define-constant sizeof-double
-  words.SIZEOF_DOUBLE)
-
-(define-constant sizeof-double-complex
-  (* 2 sizeof-double))
-
-;;; --------------------------------------------------------------------
-
-(define-constant EPSILON
-  1e-6)
-
-(define* (flonum-vector=? {O1 vector?} {O2 vector?})
-  (let loop ((i 0))
-    (or (fx=? i (vector-length O1))
-	(and (let ((X (vector-ref O1 i))
-		   (Y (vector-ref O2 i)))
-	       (< (magnitude (- X Y)) EPSILON))
-	     (loop (fxadd1 i))))))
-
-
-;;;; real and complex vector helpers
-
-(define* (ccdoubles-real-vector->scheme-vector {nslots words.signed-int?} {P pointer?})
-  (receive-and-return (V)
-      (make-vector nslots #f)
-    (do ((i 0 (fxadd1 i)))
-	((fx=? i nslots))
-      (vector-set! V i (array-ref-c-double P i)))))
-
-(define* (ccdoubles-cplx-vector->scheme-vector {nslots words.signed-int?} {P pointer?})
-  (receive-and-return (V)
-      (make-vector nslots #f)
-    (do ((i 0 (fxadd1 i))
-	 (j 0 (+ 2 j)))
-	((fx=? i nslots))
-      (let ((rep (array-ref-c-double P j))
-	    (imp (array-ref-c-double P (fxadd1 j))))
-	(vector-set! V i (make-rectangular rep imp))))))
-
-;;; --------------------------------------------------------------------
-
-(define* (scheme-vector->ccdoubles-real-vector {V vector?})
-  (define nslots (vector-length V))
-  (define nbytes (* nslots sizeof-double))
-  (receive-and-return (P)
-      (guarded-malloc nbytes)
-    (do ((i 0 (fxadd1 i)))
-	((fx=? i nslots))
-      (array-set-c-double! P i (vector-ref V i)))))
-
-(define* (scheme-vector->ccdoubles-cplx-vector {V vector?})
-  (define nslots (vector-length V))
-  (define nbytes (* nslots sizeof-double-complex))
-  (receive-and-return (P)
-      (guarded-malloc nbytes)
-    (do ((i 0 (fxadd1 i))
-	 (j 0 (+ 2 j)))
-	((fx=? i nslots))
-      (let* ((Z   (vector-ref V i))
-	     (rep (real-part Z))
-	     (imp (imag-part Z)))
-	(array-set-c-double! P j          rep)
-	(array-set-c-double! P (fxadd1 j) imp)))))
-
-
-;;;; real and complex matrix helpers
-
-(define* (ccdoubles-real-matrix->scheme-vector {nrows words.signed-int?} {ncols words.signed-int?}
-					       {P pointer?})
-  (define nslots (* nrows ncols))
-  (receive-and-return (V)
-      (make-vector nslots #f)
-    (do ((i 0 (fxadd1 i)))
-	((fx=? i nslots))
-      (vector-set! V i (array-ref-c-double P i)))))
-
-(define* (ccdoubles-cplx-matrix->scheme-vector {nrows words.signed-int?} {ncols words.signed-int?}
-					       {P pointer?})
-  (define nslots (* nrows ncols))
-  (receive-and-return (V)
-      (make-vector nslots #f)
-    (do ((i 0 (fxadd1 i))
-	 (j 0 (+ 2 j)))
-	((fx=? i nslots))
-      (let ((rep (array-ref-c-double P j))
-	    (imp (array-ref-c-double P (fxadd1 j))))
-	(vector-set! V i (make-rectangular rep imp))))))
-
-;;; --------------------------------------------------------------------
-
-(define* (scheme-vector->ccdoubles-real-matrix {nrows words.signed-int?} {ncols words.signed-int?}
-					       {V vector?})
-  (define nslots (vector-length V))
-  (define nbytes (* nslots sizeof-double))
-  (assert (= nslots (* nrows ncols)))
-  (receive-and-return (P)
-      (guarded-malloc nbytes)
-    (do ((i 0 (fxadd1 i)))
-	((fx=? i nslots))
-      (array-set-c-double! P i (vector-ref V i)))))
-
-(define* (scheme-vector->ccdoubles-cplx-matrix {nrows words.signed-int?} {ncols words.signed-int?}
-					       {V vector?})
-  (define nslots (vector-length V))
-  (define nbytes (* nslots sizeof-double-complex))
-  (assert (= nslots (* nrows ncols)))
-  (receive-and-return (P)
-      (guarded-malloc nbytes)
-    (do ((i 0 (fxadd1 i))
-	 (j 0 (+ 2 j)))
-	((fx=? i nslots))
-      (let* ((Z   (vector-ref V i))
-	     (rep (real-part Z))
-	     (imp (imag-part Z)))
-	(array-set-c-double! P j          rep)
-	(array-set-c-double! P (fxadd1 j) imp)))))
-
-
-
 (parametrise ((check-test-name	'version))
 
   (check
@@ -178,26 +57,458 @@
   #t)
 
 
-(parametrise ((check-test-name	'real-vectors-helpers))
+(parametrise ((check-test-name		'real-vector-struct)
+	      (struct-guardian-logger	#t))
+
+  (define who 'test)
+
+  (check	;this will be garbage collected
+      (let ((rvec (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector? rvec))
+    => #t)
 
   (check
-      (let* ((N 3)
-	     (P (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
-	     (V (ccdoubles-real-vector->scheme-vector N P)))
-	V)
-    => '#(1.2 3.4 5.6))
+      (ccdoubles-real-vector?/alive (ccdoubles-real-vector-initialise 3))
+    => #t)
 
-  (collect))
+  (check	;single finalisation
+      (let ((rvec (ccdoubles-real-vector-initialise 3)))
+  	(ccdoubles-real-vector-finalise rvec))
+    => (void))
+
+  (check	;double finalisation
+      (let ((rvec (ccdoubles-real-vector-initialise 3)))
+  	(ccdoubles-real-vector-finalise rvec)
+  	(ccdoubles-real-vector-finalise rvec))
+    => (void))
+
+  (check	;alive predicate after finalisation
+      (let ((rvec (ccdoubles-real-vector-initialise 3)))
+  	(ccdoubles-real-vector-finalise rvec)
+  	(ccdoubles-real-vector?/alive rvec))
+    => #f)
+
+;;; --------------------------------------------------------------------
+;;; destructor
+
+  (check
+      (with-result
+	(let ((rvec (ccdoubles-real-vector-initialise 3)))
+	  (set-ccdoubles-real-vector-custom-destructor! rvec (lambda (rvec)
+							       (add-result 123)))
+	  (ccdoubles-real-vector-finalise rvec)))
+    => '(#!void (123)))
+
+;;; --------------------------------------------------------------------
+;;; hash
+
+  (check-for-true
+   (integer? (ccdoubles-real-vector-hash (ccdoubles-real-vector-initialise 3))))
+
+  (check
+      (let ((A (ccdoubles-real-vector-initialise 3))
+	    (B (ccdoubles-real-vector-initialise 3))
+	    (T (make-hashtable ccdoubles-real-vector-hash eq?)))
+	(hashtable-set! T A 1)
+	(hashtable-set! T B 2)
+	(list (hashtable-ref T A #f)
+	      (hashtable-ref T B #f)))
+    => '(1 2))
+
+;;; --------------------------------------------------------------------
+;;; properties
+
+  (check
+      (let ((S (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector-property-list S))
+    => '())
+
+  (check
+      (let ((S (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector-putprop S 'ciao 'salut)
+	(ccdoubles-real-vector-getprop S 'ciao))
+    => 'salut)
+
+  (check
+      (let ((S (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector-putprop S 'ciao 'salut)
+	(ccdoubles-real-vector-remprop S 'ciao)
+	(ccdoubles-real-vector-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector-putprop S 'ciao 'salut)
+	(ccdoubles-real-vector-putprop S 'hello 'ohayo)
+	(list (ccdoubles-real-vector-getprop S 'ciao)
+	      (ccdoubles-real-vector-getprop S 'hello)))
+    => '(salut ohayo))
+
+  (collect 'fullest))
 
 
-(parametrise ((check-test-name	'cplx-vectors-helpers))
+(parametrise ((check-test-name		'cplx-vector-struct)
+	      (struct-guardian-logger	#t))
+
+  (define who 'test)
+
+  (check	;this will be garbage collected
+      (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector? cvec))
+    => #t)
 
   (check
-      (let* ((N 3)
-	     (P (scheme-vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
-	     (V (ccdoubles-cplx-vector->scheme-vector N P)))
-	V)
-    => '#(1.2+2.3i 3.4+4.5i 5.6+6.7i))
+      (ccdoubles-cplx-vector?/alive (ccdoubles-cplx-vector-initialise 3))
+    => #t)
+
+  (check	;single finalisation
+      (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
+  	(ccdoubles-cplx-vector-finalise cvec))
+    => (void))
+
+  (check	;double finalisation
+      (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
+  	(ccdoubles-cplx-vector-finalise cvec)
+  	(ccdoubles-cplx-vector-finalise cvec))
+    => (void))
+
+  (check	;alive predicate after finalisation
+      (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
+  	(ccdoubles-cplx-vector-finalise cvec)
+  	(ccdoubles-cplx-vector?/alive cvec))
+    => #f)
+
+;;; --------------------------------------------------------------------
+;;; destructor
+
+  (check
+      (with-result
+	(let ((cvec (ccdoubles-cplx-vector-initialise 3)))
+	  (set-ccdoubles-cplx-vector-custom-destructor! cvec (lambda (cvec)
+							       (add-result 123)))
+	  (ccdoubles-cplx-vector-finalise cvec)))
+    => '(#!void (123)))
+
+;;; --------------------------------------------------------------------
+;;; hash
+
+  (check-for-true
+   (integer? (ccdoubles-cplx-vector-hash (ccdoubles-cplx-vector-initialise 3))))
+
+  (check
+      (let ((A (ccdoubles-cplx-vector-initialise 3))
+	    (B (ccdoubles-cplx-vector-initialise 3))
+	    (T (make-hashtable ccdoubles-cplx-vector-hash eq?)))
+	(hashtable-set! T A 1)
+	(hashtable-set! T B 2)
+	(list (hashtable-ref T A #f)
+	      (hashtable-ref T B #f)))
+    => '(1 2))
+
+;;; --------------------------------------------------------------------
+;;; properties
+
+  (check
+      (let ((S (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector-property-list S))
+    => '())
+
+  (check
+      (let ((S (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector-putprop S 'ciao 'salut)
+	(ccdoubles-cplx-vector-getprop S 'ciao))
+    => 'salut)
+
+  (check
+      (let ((S (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector-putprop S 'ciao 'salut)
+	(ccdoubles-cplx-vector-remprop S 'ciao)
+	(ccdoubles-cplx-vector-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector-putprop S 'ciao 'salut)
+	(ccdoubles-cplx-vector-putprop S 'hello 'ohayo)
+	(list (ccdoubles-cplx-vector-getprop S 'ciao)
+	      (ccdoubles-cplx-vector-getprop S 'hello)))
+    => '(salut ohayo))
+
+  (collect 'fullest))
+
+
+(parametrise ((check-test-name		'real-matrix-struct)
+	      (struct-guardian-logger	#t))
+
+  (define who 'test)
+
+  (check	;this will be garbage collected
+      (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
+	(ccdoubles-real-matrix? rmat))
+    => #t)
+
+  (check
+      (ccdoubles-real-matrix?/alive (ccdoubles-real-matrix-initialise 3 4))
+    => #t)
+
+  (check	;single finalisation
+      (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
+  	(ccdoubles-real-matrix-finalise rmat))
+    => (void))
+
+  (check	;double finalisation
+      (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
+  	(ccdoubles-real-matrix-finalise rmat)
+  	(ccdoubles-real-matrix-finalise rmat))
+    => (void))
+
+  (check	;alive predicate after finalisation
+      (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
+  	(ccdoubles-real-matrix-finalise rmat)
+  	(ccdoubles-real-matrix?/alive rmat))
+    => #f)
+
+;;; --------------------------------------------------------------------
+;;; destructor
+
+  (check
+      (with-result
+	(let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
+	  (set-ccdoubles-real-matrix-custom-destructor! rmat (lambda (rmat)
+							       (add-result 123)))
+	  (ccdoubles-real-matrix-finalise rmat)))
+    => '(#!void (123)))
+
+;;; --------------------------------------------------------------------
+;;; hash
+
+  (check-for-true
+   (integer? (ccdoubles-real-matrix-hash (ccdoubles-real-matrix-initialise 3 4))))
+
+  (check
+      (let ((A (ccdoubles-real-matrix-initialise 3 4))
+	    (B (ccdoubles-real-matrix-initialise 3 4))
+	    (T (make-hashtable ccdoubles-real-matrix-hash eq?)))
+	(hashtable-set! T A 1)
+	(hashtable-set! T B 2)
+	(list (hashtable-ref T A #f)
+	      (hashtable-ref T B #f)))
+    => '(1 2))
+
+;;; --------------------------------------------------------------------
+;;; properties
+
+  (check
+      (let ((S (ccdoubles-real-matrix-initialise 3 4)))
+	(ccdoubles-real-matrix-property-list S))
+    => '())
+
+  (check
+      (let ((S (ccdoubles-real-matrix-initialise 3 4)))
+	(ccdoubles-real-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-real-matrix-getprop S 'ciao))
+    => 'salut)
+
+  (check
+      (let ((S (ccdoubles-real-matrix-initialise 3 4)))
+	(ccdoubles-real-matrix-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-real-matrix-initialise 3 4)))
+	(ccdoubles-real-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-real-matrix-remprop S 'ciao)
+	(ccdoubles-real-matrix-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-real-matrix-initialise 3 4)))
+	(ccdoubles-real-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-real-matrix-putprop S 'hello 'ohayo)
+	(list (ccdoubles-real-matrix-getprop S 'ciao)
+	      (ccdoubles-real-matrix-getprop S 'hello)))
+    => '(salut ohayo))
+
+  (collect 'fullest))
+
+
+(parametrise ((check-test-name		'cplx-matrix-struct)
+	      (struct-guardian-logger	#t))
+
+  (define who 'test)
+
+  (check	;this will be garbage collected
+      (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
+	(ccdoubles-cplx-matrix? cmat))
+    => #t)
+
+  (check
+      (ccdoubles-cplx-matrix?/alive (ccdoubles-cplx-matrix-initialise 3 4))
+    => #t)
+
+  (check	;single finalisation
+      (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
+  	(ccdoubles-cplx-matrix-finalise cmat))
+    => (void))
+
+  (check	;double finalisation
+      (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
+  	(ccdoubles-cplx-matrix-finalise cmat)
+  	(ccdoubles-cplx-matrix-finalise cmat))
+    => (void))
+
+  (check	;alive predicate after finalisation
+      (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
+  	(ccdoubles-cplx-matrix-finalise cmat)
+  	(ccdoubles-cplx-matrix?/alive cmat))
+    => #f)
+
+;;; --------------------------------------------------------------------
+;;; destructor
+
+  (check
+      (with-result
+	(let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
+	  (set-ccdoubles-cplx-matrix-custom-destructor! cmat (lambda (cmat)
+							       (add-result 123)))
+	  (ccdoubles-cplx-matrix-finalise cmat)))
+    => '(#!void (123)))
+
+;;; --------------------------------------------------------------------
+;;; hash
+
+  (check-for-true
+   (integer? (ccdoubles-cplx-matrix-hash (ccdoubles-cplx-matrix-initialise 3 4))))
+
+  (check
+      (let ((A (ccdoubles-cplx-matrix-initialise 3 4))
+	    (B (ccdoubles-cplx-matrix-initialise 3 4))
+	    (T (make-hashtable ccdoubles-cplx-matrix-hash eq?)))
+	(hashtable-set! T A 1)
+	(hashtable-set! T B 2)
+	(list (hashtable-ref T A #f)
+	      (hashtable-ref T B #f)))
+    => '(1 2))
+
+;;; --------------------------------------------------------------------
+;;; properties
+
+  (check
+      (let ((S (ccdoubles-cplx-matrix-initialise 3 4)))
+	(ccdoubles-cplx-matrix-property-list S))
+    => '())
+
+  (check
+      (let ((S (ccdoubles-cplx-matrix-initialise 3 4)))
+	(ccdoubles-cplx-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-cplx-matrix-getprop S 'ciao))
+    => 'salut)
+
+  (check
+      (let ((S (ccdoubles-cplx-matrix-initialise 3 4)))
+	(ccdoubles-cplx-matrix-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-cplx-matrix-initialise 3 4)))
+	(ccdoubles-cplx-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-cplx-matrix-remprop S 'ciao)
+	(ccdoubles-cplx-matrix-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-cplx-matrix-initialise 3 4)))
+	(ccdoubles-cplx-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-cplx-matrix-putprop S 'hello 'ohayo)
+	(list (ccdoubles-cplx-matrix-getprop S 'ciao)
+	      (ccdoubles-cplx-matrix-getprop S 'hello)))
+    => '(salut ohayo))
+
+  (collect 'fullest))
+
+
+(parametrise ((check-test-name		'setters-getters)
+	      (struct-guardian-logger	#f))
+
+  (check
+      (let ((rvec (ccdoubles-real-vector-initialise 3)))
+	(ccdoubles-real-vector-set! rvec 0 1.0)
+	(ccdoubles-real-vector-set! rvec 1 2.0)
+	(ccdoubles-real-vector-set! rvec 2 3.0)
+	(values (ccdoubles-real-vector-ref rvec 0)
+		(ccdoubles-real-vector-ref rvec 1)
+		(ccdoubles-real-vector-ref rvec 2)))
+    => 1.0 2.0 3.0)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
+	(ccdoubles-cplx-vector-set! cvec 0 1.0+2.0i)
+	(ccdoubles-cplx-vector-set! cvec 1 2.0+3.0i)
+	(ccdoubles-cplx-vector-set! cvec 2 3.0+4.0i)
+	(values (ccdoubles-cplx-vector-ref cvec 0)
+		(ccdoubles-cplx-vector-ref cvec 1)
+		(ccdoubles-cplx-vector-ref cvec 2)))
+    => 1.0+2.0i 2.0+3.0i 3.0+4.0i)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((rmat (ccdoubles-real-matrix-initialise 3 3)))
+	(ccdoubles-real-matrix-set! rmat 0 0 0.0)
+	(ccdoubles-real-matrix-set! rmat 0 1 0.1)
+	(ccdoubles-real-matrix-set! rmat 0 2 0.2)
+	(ccdoubles-real-matrix-set! rmat 1 0 1.0)
+	(ccdoubles-real-matrix-set! rmat 1 1 1.1)
+	(ccdoubles-real-matrix-set! rmat 1 2 1.2)
+	(ccdoubles-real-matrix-set! rmat 2 0 2.0)
+	(ccdoubles-real-matrix-set! rmat 2 1 2.1)
+	(ccdoubles-real-matrix-set! rmat 2 2 2.2)
+	(values (ccdoubles-real-matrix-ref rmat 0 0)
+		(ccdoubles-real-matrix-ref rmat 0 1)
+		(ccdoubles-real-matrix-ref rmat 0 2)
+		(ccdoubles-real-matrix-ref rmat 1 0)
+		(ccdoubles-real-matrix-ref rmat 1 1)
+		(ccdoubles-real-matrix-ref rmat 1 2)
+		(ccdoubles-real-matrix-ref rmat 2 0)
+		(ccdoubles-real-matrix-ref rmat 2 1)
+		(ccdoubles-real-matrix-ref rmat 2 2)))
+    => 0.0 0.1 0.2   1.0 1.1 1.2   2.0 2.1 2.2)
+
+;;; --------------------------------------------------------------------
+
+  (check
+      (let ((cmat (ccdoubles-cplx-matrix-initialise 3 3)))
+	(ccdoubles-cplx-matrix-set! cmat 0 0 0.0+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 0 1 0.1+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 0 2 0.2+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 1 0 1.0+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 1 1 1.1+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 1 2 1.2+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 2 0 2.0+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 2 1 2.1+9.0i)
+	(ccdoubles-cplx-matrix-set! cmat 2 2 2.2+9.0i)
+	(values (ccdoubles-cplx-matrix-ref cmat 0 0)
+		(ccdoubles-cplx-matrix-ref cmat 0 1)
+		(ccdoubles-cplx-matrix-ref cmat 0 2)
+		(ccdoubles-cplx-matrix-ref cmat 1 0)
+		(ccdoubles-cplx-matrix-ref cmat 1 1)
+		(ccdoubles-cplx-matrix-ref cmat 1 2)
+		(ccdoubles-cplx-matrix-ref cmat 2 0)
+		(ccdoubles-cplx-matrix-ref cmat 2 1)
+		(ccdoubles-cplx-matrix-ref cmat 2 2)))
+    => 0.0+9.0i 0.1+9.0i 0.2+9.0i   1.0+9.0i 1.1+9.0i 1.2+9.0i   2.0+9.0i 2.1+9.0i 2.2+9.0i)
 
   (collect))
 
@@ -206,30 +517,32 @@
 
   (check
       (let* ((N 3)
-  	     (P (guarded-malloc (* 3 sizeof-double))))
-        (ccdoubles-real-vector-clear N P)
-  	(ccdoubles-real-vector->scheme-vector N P))
+  	     (V (ccdoubles-real-vector-initialise N)))
+	#;(debug-print (ccdoubles-real-vector->scheme-vector V))
+        (ccdoubles-real-vector-clear V)
+	(ccdoubles-real-vector->scheme-vector V))
     => '#(0.0 0.0 0.0))
 
   (check
       (let* ((N 3)
-  	     (P (guarded-malloc (* 3 sizeof-double))))
-        (ccdoubles-real-vector-set N P 1.2)
-  	(ccdoubles-real-vector->scheme-vector N P))
+  	     (V (ccdoubles-real-vector-initialise N)))
+	#;(debug-print (ccdoubles-real-vector->scheme-vector V))
+        (ccdoubles-real-vector-set V 1.2)
+  	(ccdoubles-real-vector->scheme-vector V))
     => '#(1.2 1.2 1.2))
 
   (check
       (let* ((N 3)
   	     (S (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
-  	     (D (guarded-malloc (* 3 sizeof-double))))
-        (ccdoubles-real-vector-copy N D S)
-  	(ccdoubles-real-vector->scheme-vector N D))
+  	     (D (ccdoubles-real-vector-initialise N)))
+        (ccdoubles-real-vector-copy D S)
+  	(ccdoubles-real-vector->scheme-vector D))
     => '#(1.2 3.4 5.6))
 
   (collect))
 
 
-(parametrise ((check-test-name	'real-vectors-arithmetic))
+#;(parametrise ((check-test-name	'real-vectors-arithmetic))
 
   (check
       (let* ((N 3)
@@ -287,7 +600,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'cplx-vectors-basic))
+#;(parametrise ((check-test-name	'cplx-vectors-basic))
 
   (check
       (let* ((N 3)
@@ -314,7 +627,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'cplx-vectors-arithmetic))
+#;(parametrise ((check-test-name	'cplx-vectors-arithmetic))
 
   (check
       (let* ((N 3)
@@ -377,7 +690,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'real-matrix-helpers))
+#;(parametrise ((check-test-name	'real-matrix-helpers))
 
   (check
       (let* ((nrows 2)
@@ -390,7 +703,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'real-matrices-basic))
+#;(parametrise ((check-test-name	'real-matrices-basic))
 
   (check
       (let* ((nrows 2)
@@ -420,7 +733,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'real-matrices-arithmetic))
+#;(parametrise ((check-test-name	'real-matrices-arithmetic))
 
   (check
       (let* ((nrows 2)
@@ -477,7 +790,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'cplx-matrix-helpers))
+#;(parametrise ((check-test-name	'cplx-matrix-helpers))
 
   (define-constant L1
     '(1.1+0.1i 1.2+0.1i 1.3+0.1i 2.1+0.1i 2.2+0.1i 2.3+0.1i))
@@ -496,7 +809,7 @@
   (collect))
 
 
-(parametrise ((check-test-name	'cplx-matrices-arithmetic))
+#;(parametrise ((check-test-name	'cplx-matrices-arithmetic))
 
   (define-constant L1
     '(1.1+0.1i 1.2+0.1i 1.3+0.1i 2.1+0.1i 2.2+0.1i 2.3+0.1i))
