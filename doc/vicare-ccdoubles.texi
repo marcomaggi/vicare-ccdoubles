@@ -187,10 +187,11 @@ The following Scheme libraries are installed:
 @item @library{vicare math ccdoubles}
 @cindex Library @library{vicare math ccdoubles}
 @cindex @library{vicare math ccdoubles}, library
-It exports one binding for each @value{FOREIGN_PACKAGE} public function.
-All the Scheme function names are directly derived from the C function
-names by replacing underscore characters @samp{_} with dash characters
-@samp{-}; so @cfunc{ccdoubles_real_vector_log} becomes
+It exports one binding for each @value{FOREIGN_PACKAGE} public function;
+it implements a high--level @api{}.  All the Scheme function names are
+directly derived from the C function names by replacing underscore
+characters @samp{_} with dash characters @samp{-}; so
+@cfunc{ccdoubles_real_vector_log} becomes
 @func{ccdoubles-real-vector-log}.
 
 @item @library{vicare math ccdoubles functions}
