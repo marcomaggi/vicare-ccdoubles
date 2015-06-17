@@ -1,0 +1,321 @@
+\input texinfo.tex
+@c %**start of header
+@setfilename vicare-ccdoubles.info
+@settitle CCDoubles for Vicare
+@c %**end of header
+
+@include version.texi
+@include macros.texi
+
+@c page
+@c ------------------------------------------------------------
+@c Values.
+@c ------------------------------------------------------------
+
+@set TITLE                      CCDoubles for Vicare
+
+@c To be used as @value{PACKAGE} whenever we need to include the full
+@c name of this package.
+@set PACKAGE                    Vicare/@ccdoubles{}
+
+@c To be used as @value{PACKAGE} whenever we need to include the
+@c nickname of the project: the name that is used to compose the
+@c distribution tarball or the web address.
+@set PACKAGE_NICKNAME           vicare-ccdoubles
+
+@c To be used as @value{AUTHOR} whenever we need to include the list of
+@c authors of this document.
+@set AUTHOR                     Marco Maggi
+
+@c To be used as @value{AUTHOR_EMAIL} whenever we need to include the
+@c email of the *single* author of this document.
+@set AUTHOR_EMAIL               @email{marco.maggi.ipsu@@poste.it}
+
+@c To be used as @value{COPYRIGHT_YEARS} whenever we need to include the
+@c list of copyright years.
+@set COPYRIGHT_YEARS            2015
+
+@c ------------------------------------------------------------
+
+@set FOREIGN_PACKAGE            @ccdoubles{}
+@set FOREIGN_VERSION            0.1d2
+@set FOREIGN_URL                @url{http://github.com/marcomaggi/ccdoubles}
+@set FOREIGN_SCHEME_LIB         @library{vicare math ccdoubles}
+@c @set NAUSICAA_SCHEME_LIB        @library{nausicaa math ccdoubles}
+@set GITHUB_URL                 @url{http://github.com/marcomaggi/@value{PACKAGE_NICKNAME}}
+@set BITBUCKET_URL              @url{https://bitbucket.org/marcomaggi/@value{PACKAGE_NICKNAME}}
+@set DOWNLOAD_URL               @url{https://bitbucket.org/marcomaggi/@value{PACKAGE_NICKNAME}/downloads}
+@set DOCUMENTATION_URL          @url{http://marcomaggi.github.io/docs/@value{PACKAGE_NICKNAME}.html}
+@set VICARE_HOMEPAGE_URL        @url{http://marcomaggi.github.io/vicare.html}
+
+@macro ccdoublesref{NODE, TITLE}
+@xref{\NODE\,\TITLE\,\TITLE\,ccdoubles}
+@end macro
+
+@macro ccdoubles{}
+@acronym{CCDoubles}
+@end macro
+
+@c page
+@c ------------------------------------------------------------
+@c Copyright notice.
+@c ------------------------------------------------------------
+
+@copying
+This document describes version @version{} of @value{PACKAGE}, a
+distribution of C and Scheme libraries for Vicare Scheme, an @rnrs{6}
+compliant Scheme implementation; it provides bindings for the
+@value{FOREIGN_PACKAGE} C language library.
+
+The package is distributed under the terms of the @gnu{} General Public
+License (@gpl{}) and can be downloaded from:
+
+@center @value{DOWNLOAD_URL}
+
+@noindent
+development takes place at:
+
+@center @value{GITHUB_URL}
+
+@noindent
+and as backup at:
+
+@center @value{BITBUCKET_URL}
+
+@noindent
+@value{FOREIGN_PACKAGE} is available at:
+
+@center @value{FOREIGN_URL}
+
+@noindent
+Copyright @copyright{} @value{COPYRIGHT_YEARS} by @value{AUTHOR} @value{AUTHOR_EMAIL}
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the @gnu{} Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with
+Invariant Sections being ``@gnu{} Free Documentation License'' and
+``@gnu{} General Public License'', no Front--Cover Texts, and no
+Back--Cover Texts.  A copy of the license is included in the section
+entitled ``@gnu{} Free Documentation License''.
+@end quotation
+@end copying
+
+@c page
+@c ------------------------------------------------------------
+@c Headers.
+@c ------------------------------------------------------------
+
+@titlepage
+@title @value{TITLE}
+@subtitle Revision @version{}
+@author @value{AUTHOR} @value{AUTHOR_EMAIL}
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@c ------------------------------------------------------------
+
+@ifinfo
+@dircategory Development
+@direntry
+* vicare-ccdoubles: (vicare-ccdoubles). @value{TITLE}.
+@end direntry
+@end ifinfo
+
+@c ------------------------------------------------------------
+
+@ignore
+@syncodeindex tp cp
+@syncodeindex vr cp
+@syncodeindex fn cp
+@end ignore
+
+@c page
+@ifnottex
+@node Top
+@top @value{TITLE}
+
+@insertcopying
+
+@menu
+* overview::                    Overview of the package.
+* plain::                       Plain programming interface.
+
+Appendices
+
+* Package License::             GNU General Public License.
+* Documentation License::       GNU Free Documentation License.
+* references::                  Bibliography and references.
+
+Indexes
+
+* concept index::               An entry for each concept.
+* function index::              An entry for each function.
+* variable index::              An entry for each variable.
+* type index::                  An entry for each type.
+@end menu
+@end ifnottex
+
+@c page
+@node overview
+@chapter Overview of the package
+
+
+Vicare Scheme is an @rnrs{6} compliant Scheme language implementation in
+the form of a native compiler for x86 architectures, officially
+supporting @gnu{}+Linux systems.  @value{PACKAGE} is a distribution of C
+language and Scheme language libraries for Vicare Scheme; it provides
+bindings for the @value{FOREIGN_PACKAGE} C language library.
+
+The last time the author bothered to update this paragraph, he had
+tested @value{FOREIGN_PACKAGE} version @value{FOREIGN_VERSION}; the
+@value{FOREIGN_PACKAGE} library is available at:
+
+@center @value{FOREIGN_URL}
+
+The package installs a C language library implementing wrapper C
+functions for the C language @value{FOREIGN_PACKAGE} library; on top of this, the
+Scheme library @library{vicare math ccdoubles} exports one binding
+for each @value{FOREIGN_PACKAGE} public function; additionally the library
+@library{vicare math ccdoubles constants} exports one binding for
+each constant value defined in the C language header @file{ccdoubles.h}.
+
+The following Scheme libraries are installed:
+
+@table @asis
+@item @library{vicare math ccdoubles}
+@cindex Library @library{vicare math ccdoubles}
+@cindex @library{vicare math ccdoubles}, library
+It exports one binding for each @value{FOREIGN_PACKAGE} public function.
+All the Scheme function names are directly derived from the C function
+names by replacing underscore characters @samp{_} with dash characters
+@samp{-}; so @cfunc{ccdoubles_real_vector_log} becomes
+@func{ccdoubles-real-vector-log}.
+
+@item @library{vicare math ccdoubles functions}
+@cindex Library @library{vicare math ccdoubles functions}
+@cindex @library{vicare math ccdoubles functions}, library
+It exports one syntactic binding for each @value{FOREIGN_PACKAGE} public
+function.  All the Scheme function names are equal to the C function
+names.
+@end table
+
+Scheme libraries are installed under the directory:
+
+@center @file{$(libdir)/vicare-scheme}
+
+This document contains only a brief description of the functions: refer
+to the @value{FOREIGN_PACKAGE}'s documentation for details.
+
+@c page
+@node plain
+@chapter Plain programming interface
+
+
+@cindex Library @value{FOREIGN_SCHEME_LIB}
+@cindex @value{FOREIGN_SCHEME_LIB}, library
+
+
+The library @value{FOREIGN_SCHEME_LIB} implements the high level @api{}
+for @value{FOREIGN_PACKAGE}.  All the functions not described in this
+chapter have the same @api{} of the corresponding C function.
+
+@menu
+* plain version::               @value{PACKAGE} version informations.
+@end menu
+
+@c page
+@node plain version
+@section @value{PACKAGE} version informations
+
+
+The installed C library follows version numbering as established by the
+@gnu{} Autotools.  For an explanation of interface numbers as managed by
+@gnu{} Libtool @xref{Libtool versioning, interface, Libtool's versioning
+system, libtool, Shared library support for @gnu{}}.
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-version-interface-current
+@defunx ccdoubles-version-interface-revision
+@defunx ccdoubles-version-interface-age
+Return a fixnum representing a version number.
+@end defun
+
+
+@defun ccdoubles-version-string
+Return a Scheme string representing the version number.
+@end defun
+
+@c page
+@c ------------------------------------------------------------
+@c Appendices.
+@c ------------------------------------------------------------
+
+@include gpl-3.0.texi
+@include fdl-1.3.texi
+
+@c page
+@node references
+@appendix Bibliography and references
+
+
+The documentation of @value{PACKAGE} is available online:
+
+@center @value{DOCUMENTATION_URL}
+
+@noindent
+the latest version of this package can be downloaded from:
+
+@center @value{DOWNLOAD_URL}
+
+@noindent
+development takes place at:
+
+@center @value{GITHUB_URL}
+
+@noindent
+and as backup at:
+
+@center @value{BITBUCKET_URL}
+
+@noindent
+the home page of the Vicare project is at:
+
+@center @value{VICARE_HOMEPAGE_URL}
+
+@noindent
+@value{FOREIGN_PACKAGE} can be found here:
+
+@center @value{FOREIGN_URL}
+
+@c page
+@node concept index
+@appendix An entry for each concept
+
+@printindex cp
+
+@node function index
+@appendix An entry for each function.
+
+@printindex fn
+
+@node variable index
+@appendix An entry for each variable.
+
+@printindex vr
+
+@node type index
+@appendix An entry for each type.
+
+@printindex tp
+
+@contents
+@bye
+
+@c end of file
+
