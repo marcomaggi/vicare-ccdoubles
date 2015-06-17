@@ -76,7 +76,8 @@ clean-fasl:
 #### running the test suite: test files selection
 
 VICARE_CCDOUBLES_PLAIN_TESTS		= \
-	tests/test-vicare-ccdoubles.sps
+	tests/test-vicare-ccdoubles-functions.sps	\
+	tests/test-vicare-ccdoubles-high.sps
 
 TESTS	= $(VICARE_CCDOUBLES_PLAIN_TESTS)
 
