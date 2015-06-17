@@ -63,9 +63,10 @@
 
 @copying
 This document describes version @version{} of @value{PACKAGE}, a
-distribution of C and Scheme libraries for Vicare Scheme, an @rnrs{6}
+distribution of Scheme libraries for Vicare Scheme, an @rnrs{6}
 compliant Scheme implementation; it provides bindings for the
-@value{FOREIGN_PACKAGE} C language library.
+@value{FOREIGN_PACKAGE} C language library.  @value{PACKAGE} makes use
+of the Foreign Functions Interface (@ffi{}) provided by Vicare Scheme.
 
 The package is distributed under the terms of the @gnu{} General Public
 License (@gpl{}) and can be downloaded from:
@@ -165,9 +166,11 @@ Indexes
 
 Vicare Scheme is an @rnrs{6} compliant Scheme language implementation in
 the form of a native compiler for x86 architectures, officially
-supporting @gnu{}+Linux systems.  @value{PACKAGE} is a distribution of C
-language and Scheme language libraries for Vicare Scheme; it provides
-bindings for the @value{FOREIGN_PACKAGE} C language library.
+supporting @gnu{}+Linux systems.  @value{PACKAGE} is a distribution of
+Scheme language libraries for Vicare Scheme; it provides bindings for
+the @value{FOREIGN_PACKAGE} C language library.  @value{PACKAGE} makes
+use of the Foreign Functions Interface (@ffi{}) provided by Vicare
+Scheme.
 
 The last time the author bothered to update this paragraph, he had
 tested @value{FOREIGN_PACKAGE} version @value{FOREIGN_VERSION}; the
@@ -175,12 +178,8 @@ tested @value{FOREIGN_PACKAGE} version @value{FOREIGN_VERSION}; the
 
 @center @value{FOREIGN_URL}
 
-The package installs a C language library implementing wrapper C
-functions for the C language @value{FOREIGN_PACKAGE} library; on top of this, the
-Scheme library @library{vicare math ccdoubles} exports one binding
-for each @value{FOREIGN_PACKAGE} public function; additionally the library
-@library{vicare math ccdoubles constants} exports one binding for
-each constant value defined in the C language header @file{ccdoubles.h}.
+The package installs a Scheme library @value{FOREIGN_SCHEME_LIB} which
+exports one binding for each @value{FOREIGN_PACKAGE} public function.
 
 The following Scheme libraries are installed:
 

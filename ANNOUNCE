@@ -4,10 +4,12 @@ Subject: [announce] Vicare/CCDoubles revision 0.4d0
 			    ================
 
 
-This package  is a  distribution of  C and  Scheme libraries  for Vicare
-Scheme, an R6RS compliant Scheme implementation  in the form of a native
-compiler for x86 architectures, officially supporting GNU+Linux systems;
-it provides bindings for the CCDoubles C language library.
+This package is a distribution of Scheme libraries for Vicare Scheme, an
+R6RS compliant  Scheme implementation in  the form of a  native compiler
+for  x86  architectures,  officially supporting  GNU+Linux  systems;  it
+provides   bindings    for   the    CCDoubles   C    language   library.
+Vicare/CCDoubles  makes use  of  the Foreign  Functions Interface  (FFI)
+provided by Vicare Scheme.
 
   This package makes use of the GNU Autotools.
 

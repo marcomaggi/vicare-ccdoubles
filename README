@@ -18,9 +18,10 @@ Topics
 1. Introduction
 ---------------
 
-This package  is a  distribution of  C and  Scheme libraries  for Vicare
-Scheme, an  R6RS compliant  Scheme implementation; it  provides bindings
-for the CCDoubles C language library.
+This package is a distribution of Scheme libraries for Vicare Scheme, an
+R6RS  compliant  Scheme implementation;  it  provides  bindings for  the
+CCDoubles C language library.  Vicare/CCDoubles makes use of the Foreign
+Functions Interface (FFI) provided by Vicare Scheme.
 
   The last  time the author  bothered to  update this paragraph,  he had
 tested CCDoubles version 0.1d2.
