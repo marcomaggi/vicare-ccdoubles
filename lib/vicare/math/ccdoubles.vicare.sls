@@ -1402,7 +1402,7 @@
 
 (define-real-vector-op-1 ccdoubles-real-vector-sqrt	ccdoubles_real_vector_sqrt)
 (define-real-vector-op-1 ccdoubles-real-vector-cbrt	ccdoubles_real_vector_cbrt)
-(define-real-vector-op-1 ccdoubles-real-vector-hypot	ccdoubles_real_vector_hypot)
+(define-real-vector-op-2 ccdoubles-real-vector-hypot	ccdoubles_real_vector_hypot)
 (define-real-vector-op-1 ccdoubles-real-vector-expm1	ccdoubles_real_vector_expm1)
 (define-real-vector-op-1 ccdoubles-real-vector-log1p	ccdoubles_real_vector_log1p)
 
@@ -1415,7 +1415,7 @@
 (define-real-vector-op-1 ccdoubles-real-vector-asin	ccdoubles_real_vector_asin)
 (define-real-vector-op-1 ccdoubles-real-vector-acos	ccdoubles_real_vector_acos)
 (define-real-vector-op-1 ccdoubles-real-vector-atan	ccdoubles_real_vector_atan)
-(define-real-vector-op-1 ccdoubles-real-vector-atan2	ccdoubles_real_vector_atan2)
+(define-real-vector-op-2 ccdoubles-real-vector-atan2	ccdoubles_real_vector_atan2)
 
 ;;; --------------------------------------------------------------------
 ;;; hyperbolic
@@ -1554,7 +1554,7 @@
 
 (define-real-matrix-op-1 ccdoubles-real-matrix-sqrt	ccdoubles_real_matrix_sqrt)
 (define-real-matrix-op-1 ccdoubles-real-matrix-cbrt	ccdoubles_real_matrix_cbrt)
-(define-real-matrix-op-1 ccdoubles-real-matrix-hypot	ccdoubles_real_matrix_hypot)
+(define-real-matrix-op-2 ccdoubles-real-matrix-hypot	ccdoubles_real_matrix_hypot)
 (define-real-matrix-op-1 ccdoubles-real-matrix-expm1	ccdoubles_real_matrix_expm1)
 (define-real-matrix-op-1 ccdoubles-real-matrix-log1p	ccdoubles_real_matrix_log1p)
 
@@ -1567,7 +1567,7 @@
 (define-real-matrix-op-1 ccdoubles-real-matrix-asin	ccdoubles_real_matrix_asin)
 (define-real-matrix-op-1 ccdoubles-real-matrix-acos	ccdoubles_real_matrix_acos)
 (define-real-matrix-op-1 ccdoubles-real-matrix-atan	ccdoubles_real_matrix_atan)
-(define-real-matrix-op-1 ccdoubles-real-matrix-atan2	ccdoubles_real_matrix_atan2)
+(define-real-matrix-op-2 ccdoubles-real-matrix-atan2	ccdoubles_real_matrix_atan2)
 
 ;;; --------------------------------------------------------------------
 ;;; hyperbolic

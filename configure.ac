@@ -25,6 +25,8 @@ LT_INIT([shared disable-static])
 AC_LANG([C])
 AC_DEFINE([_GNU_SOURCE],[1],[enable everything GNU])
 
+dnl --------------------------------------------------------------------
+
 VICARE_SCHEME
 VICARE_CHECK_LIBRARY([VICARE],
   [(vicare (or (0 4 2015 5 (>= 26))
@@ -33,6 +35,8 @@ VICARE_CHECK_LIBRARY([VICARE],
 AS_IF([test "$vicare_cv_schemelib_VICARE" = no],
   [AC_MSG_ERROR([wrong Vicare version],1)])
 
+dnl
+
 VICARE_CHECK_LIBRARY([VICARE_FFI],
   [(vicare ffi (or (0 4 2015 5 (>= 27))
                    (0 4 2015 (>= 6))
@@ -40,6 +44,18 @@ VICARE_CHECK_LIBRARY([VICARE_FFI],
 
 AS_IF([test "$vicare_cv_schemelib_VICARE_FFI" = no],
   [AC_MSG_ERROR([wrong Vicare FFI library version],1)])
+
+dnl
+
+VICARE_CHECK_LIBRARY([VICARE_PLATFORM_CONSTANTS],
+  [(vicare platform constants (or (0 4 2015 6 (>= 18))
+                              (0 4 2015 (>= 7))
+                              (0 4 (>= 2016))))])
+
+AS_IF([test "$vicare_cv_schemelib_VICARE_PLATFORM_CONSTANTS" = no],
+  [AC_MSG_ERROR([wrong (vicare platform constants) library version],1)])
+
+dnl --------------------------------------------------------------------
 
 # Command  line  options  for  the executable  "vicare".   The  variable
 # AX_VFLAGS is  for options preselected by  the building infrastructure.

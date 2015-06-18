@@ -52,6 +52,10 @@
 @xref{\NODE\,\TITLE\,\TITLE\,ccdoubles}
 @end macro
 
+@macro ccdoublesfunref{NODE, FUNC, TITLE}
+@xref{\NODE\,\FUNC\,\TITLE\,ccdoubles}
+@end macro
+
 @macro ccdoubles{}
 @acronym{CCDoubles}
 @end macro
@@ -267,6 +271,14 @@ Return a Scheme string representing the version number.
 * plain rvec access::           Setters and getters.
 * plain rvec conversion::       Object types conversion.
 * plain rvec basic::            Basic vector operations.
+* plain rvec arithmetic::       Arithmetic vector operations.
+* plain rvec rounding::         Rounding vector operations.
+* plain rvec comparison::       Comparison vector operations.
+* plain rvec inspection::       Inepsction vector operations.
+* plain rvec special::          Special vector operations.
+* plain rvec explog::           Exponentiation and logarithm vector operations.
+* plain rvec trigonometric::    Trigonometric vector operations.
+* plain rvec hyperbolic::       Hyperbolic vector operations.
 @end menu
 
 @c page
@@ -480,6 +492,416 @@ Set all the slots to the flonum @var{flo}.
 @defun ccdoubles-real-vector-copy @var{dst-rvec} @var{src-rvec}
 Copy all the slots from the source vector @var{src-rvec} to the
 destination vector @var{dst-rvec}.
+@end defun
+
+@c page
+@node plain rvec arithmetic
+@subsection Arithmetic vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real arithmetic, Arithmetic real vectors
+operations}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-real-vector}.
+
+
+@defun ccdoubles-real-vector-add @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} + @varii{O}}.
+@end defun
+
+@defun ccdoubles-real-vector-sub @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} - @varii{O}}.
+@end defun
+
+@defun ccdoubles-real-vector-mul @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} * @varii{O}}, slot by slot.
+@end defun
+
+@defun ccdoubles-real-vector-div @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} / @varii{O}}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-neg @var{R} @var{O}
+Store in @var{R} the negation of @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-abs @var{R} @var{O}
+Store in @var{R} the absolute value of @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-fmod @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of applying @cfunc{fmod} to the slots of
+@vari{O} and @varii{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-drem @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of applying @cfunc{drem} to the slots of
+@vari{O} and @varii{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-remainder @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of applying @cfunc{remainder} to the slots
+of @vari{O} and @varii{O}.
+@end defun
+
+@c page
+@node plain rvec rounding
+@subsection Rounding vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real rounding, Rounding real vectors
+operations}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-real-vector}.
+
+
+@defun ccdoubles-real-vector-ceil @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{ceil} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-floor @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{floor} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-trunc @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{trunc} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-round @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{round} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-rint @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{rint} to @var{O}.
+@end defun
+
+@c page
+@node plain rvec comparison
+@subsection Comparison vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real comparison, Comparing real
+vectors}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-real-vector}, all the operands @var{IR} are instances
+of @objtype{ccdoubles-int-vector}.
+
+
+@defun ccdoubles-real-vector-isgreater @var{IR} @vari{O} @varii{O}
+Store in @var{IR} the result of applying @cfunc{isgreater} to the
+operands @vari{O} and @varii{O}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-isgreaterequal @var{IR} @vari{O} @varii{O}
+Store in @var{IR} the result of applying @cfunc{isgreaterequal} to the
+operands @vari{O} and @varii{O}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-isless @var{IR} @vari{O} @varii{O}
+Store in @var{IR} the result of applying @cfunc{isless} to the operands
+@vari{O} and @varii{O}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-islessequal @var{IR} @vari{O} @varii{O}
+Store in @var{IR} the result of applying @cfunc{islessequal} to the
+operands @vari{O} and @varii{O}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-islessgreater @var{IR} @vari{O} @varii{O}
+Store in @var{IR} the result of applying @cfunc{islessgreater} to the
+operands @vari{O} and @varii{O}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-isunordered @var{IR} @vari{O} @varii{O}
+Store in @var{IR} the result of applying @cfunc{isunordered} to the
+operands @vari{O} and @varii{O}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-min @var{R} @vari{O} @varii{O}
+Store in @var{R} the minimum between @vari{O} and @varii{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-max @var{R} @vari{O} @varii{O}
+Store in @var{R} the maximum between @vari{O} and @varii{O}.
+@end defun
+
+@c page
+@node plain rvec inspection
+@subsection Inepsction vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real predicates, Inspecting real
+vectors}.  All the operands @var{O} are instances of
+@objtype{ccdoubles-real-vector}, all the operands @var{IR} are instances
+of @objtype{ccdoubles-int-vector}.
+
+
+@defun ccdoubles-real-vector-fpclassify @var{IR} @var{O}
+Store in @var{IR} the result of applying @cfunc{fpclassify} to @var{O},
+slot by slot.
+
+The values stored in @var{IR} are the constants:
+
+@example
+FP_NAN          FP_INFINITE     FP_ZERO
+FP_SUBNORMAL    FP_NORMAL
+@end example
+
+@noindent
+which are available in the library @library{vicare platform constants}.
+@end defun
+
+
+@defun ccdoubles-real-vector-isfinite @var{IR} @var{O}
+Store in @var{IR} the result of applying @cfunc{isfinite} to @var{O},
+slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-isinfinite @var{IR} @var{O}
+Store in @var{IR} the result of applying @cfunc{isinfinite} to @var{O},
+slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-isnormal @var{IR} @var{O}
+Store in @var{IR} the result of applying @cfunc{isnormal} to @var{O},
+slot by slot.
+@end defun
+
+
+@defun ccdoubles-real-vector-isnan @var{IR} @var{O}
+Store in @var{IR} the result of applying @cfunc{isnan} to @var{O}, slot
+by slot.
+@end defun
+
+@c page
+@node plain rvec special
+@subsection Special vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real special, Special real vector
+operations}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-real-vector}.
+
+
+@defun ccdoubles-real-vector-scalar-product @vari{O} @varii{O}
+Return a flonum object representing the scalar product between @vari{O}
+and @varii{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-scalar-mul @var{R} @var{L} @var{O}
+Store in @var{R} the result of multiplying the scalar flonum @var{l} to
+@var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-linear-combination @var{R} @var{A} @vari{O} @var{B} @varii{O}
+Compute @code{@var{R} = @var{A} * @vari{O} + @var{B} * @varii{O}}, where
+@var{A} and @var{B} are scalar flonum objects.
+@end defun
+
+
+@defun ccdoubles-real-vector-linspace @var{R} @var{start} @var{past}
+Fill @var{R} with evenly spaced steps from @var{start} included to
+@var{past} excluded.  @var{start} and @var{past} are flonum objects.
+@end defun
+
+
+@defun ccdoubles-real-vector-logspace @var{R} @var{start} @var{past}
+Fill @var{R} with logarithmically spaced steps from @var{start} included
+to @var{past} excluded.  @var{start} and @var{past} are flonum objects.
+@end defun
+
+@c page
+@node plain rvec explog
+@subsection Exponentiation and logarithm vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real explog, Real vector exponentiation
+and logarithms}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-real-vector}.
+
+
+@defun ccdoubles-real-vector-exp @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{exp} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-exp10 @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{exp10} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-exp2 @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{exp2} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-log @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{log} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-log10 @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{log10} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-log2 @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{log2} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-logb @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{logb} to @var{O}.
+@end defun
+
+
+
+@defun ccdoubles-real-vector-pow @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of applying @cfunc{pow} to @vari{O} and
+@varii{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-sqrt @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{sqrt} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-cbrt @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{cbrt} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-hypot @var{R} @vari{O} @varii{}
+Store in @var{R} the result of applying @cfunc{hypot} to @vari{O} and
+@varii{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-expm1 @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{expm1} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-log1p @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{log1p} to @var{O}.
+@end defun
+
+@c page
+@node plain rvec trigonometric
+@subsection Trigonometric vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real trigonometric, Trigonometric real
+vector operations}.  All the operands @var{R} and @var{O} are instances
+of @objtype{ccdoubles-real-vector}.
+
+
+@defun ccdoubles-real-vector-sin @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{sin} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-cos @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{cos} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-tan @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{tan} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-asin @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{asin} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-acos @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{acos} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-atan @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{atan} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-atan2 @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of applying @cfunc{atan2} to @vari{O} and
+@varii{O}.
+@end defun
+
+@c page
+@node plain rvec hyperbolic
+@subsection Hyperbolic vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{vectors real hyperbolic, Hyperbolic real vector
+operations}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-real-vector}.
+
+
+@defun ccdoubles-real-vector-sinh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{sinh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-cosh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{cosh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-tanh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{tanh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-asinh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{asinh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-acosh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{acosh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-real-vector-atanh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{atanh} to @var{O}.
 @end defun
 
 @c page
