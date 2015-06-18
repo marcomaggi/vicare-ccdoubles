@@ -98,6 +98,11 @@
     ccdoubles-int-vector->vector		vector->ccdoubles-int-vector
     ccdoubles-int-matrix->vector		vector->ccdoubles-int-matrix
 
+    ;; printing
+    ccdoubles-real-vector-print			ccdoubles-cplx-vector-print
+    ccdoubles-real-matrix-print			ccdoubles-cplx-matrix-print
+    ccdoubles-print
+
     ;; real vectors
     ccdoubles-real-vector-clear
     ccdoubles-real-vector-set
@@ -1153,7 +1158,7 @@
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots)
 	 rvec)
-      (array-set-c-double! ptr i (vector-ref V i)))))
+      (array-set-c-double! ptr i (inexact (vector-ref V i))))))
 
 ;;; --------------------------------------------------------------------
 ;;; complex vectors
@@ -1175,7 +1180,7 @@
     (do ((ptr ($ccdoubles-cplx-vector-pointer cvec))
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots))
-      (%array-set-c-double-complex! ptr i (vector-ref V i)))))
+      (%array-set-c-double-complex! ptr i (inexact (vector-ref V i))))))
 
 ;;; --------------------------------------------------------------------
 ;;; real matrices
@@ -1202,7 +1207,7 @@
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots)
 	 rmat)
-      ($ccdoubles-real-vector-set! rmat i (vector-ref vec i)))))
+      ($ccdoubles-real-vector-set! rmat i (inexact (vector-ref vec i))))))
 
 ;;; --------------------------------------------------------------------
 ;;; complex matrices
@@ -1229,7 +1234,7 @@
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots)
 	 cmat)
-      ($ccdoubles-cplx-vector-set! cmat i (vector-ref vec i)))))
+      ($ccdoubles-cplx-vector-set! cmat i (inexact (vector-ref vec i))))))
 
 ;;; --------------------------------------------------------------------
 ;;; integer vectors
@@ -1917,6 +1922,87 @@
 (define ccdoubles-int-matrix-clear			ccdoubles_int_matrix_clear)
 (define ccdoubles-int-matrix-set			ccdoubles_int_matrix_set)
 (define ccdoubles-int-matrix-copy			ccdoubles_int_matrix_copy)
+
+
+;;;; printing
+
+(case-define* ccdoubles-real-vector-print
+  (({O ccdoubles-real-vector?/alive})
+   (ccdoubles-real-vector-print O (current-output-port)))
+  (({O ccdoubles-real-vector?/alive} {port textual-output-port?})
+   (define nslots ($ccdoubles-real-vector-nslots O))
+   (fprintf port "[~a" ($ccdoubles-real-vector-ref O 0))
+   (do ((i 1 (fxadd1 i)))
+       ((= i nslots))
+     (fprintf port " ~a" ($ccdoubles-real-vector-ref O i)))
+   (fprintf port "]\n")))
+
+(case-define* ccdoubles-cplx-vector-print
+  (({O ccdoubles-cplx-vector?/alive})
+   (ccdoubles-cplx-vector-print O (current-output-port)))
+  (({O ccdoubles-cplx-vector?/alive} {port textual-output-port?})
+   (define nslots ($ccdoubles-cplx-vector-nslots O))
+   (fprintf port "[~a" ($ccdoubles-cplx-vector-ref O 0))
+   (do ((i 1 (fxadd1 i)))
+       ((= i nslots))
+     (fprintf port " ~a" ($ccdoubles-cplx-vector-ref O i)))
+   (fprintf port "]\n")))
+
+(case-define* ccdoubles-real-matrix-print
+  (({O ccdoubles-real-vector?/alive})
+   (ccdoubles-real-matrix-print O (current-output-port)))
+  (({O ccdoubles-real-matrix?/alive} {port textual-output-port?})
+   (define nrows ($ccdoubles-real-matrix-nrows O))
+   (define ncols ($ccdoubles-real-matrix-ncols O))
+   (fprintf port "[[~a" ($ccdoubles-real-vector-ref O 0))
+   (do ((j 1 (fxadd1 j)))
+       ((= j ncols))
+     (fprintf port " ~a" ($ccdoubles-real-vector-ref O j)))
+   (fprintf port "]")
+   (do ((i 1 (fxadd1 i)))
+       ((= i nrows))
+     (fprintf port "\n [~a" ($ccdoubles-real-vector-ref O (infix i * ncols)))
+     (do ((j 1 (fxadd1 j)))
+	 ((= j ncols))
+       (fprintf port " ~a" ($ccdoubles-real-vector-ref O (infix i * ncols + j))))
+     (fprintf port "]"))
+   (fprintf port "]\n")))
+
+(case-define* ccdoubles-cplx-matrix-print
+  (({O ccdoubles-real-vector?/alive})
+   (ccdoubles-cplx-matrix-print O (current-output-port)))
+  (({O ccdoubles-cplx-matrix?/alive} {port textual-output-port?})
+   (define nrows ($ccdoubles-cplx-matrix-nrows O))
+   (define ncols ($ccdoubles-cplx-matrix-ncols O))
+   (fprintf port "[[~a" ($ccdoubles-cplx-vector-ref O 0))
+   (do ((j 1 (fxadd1 j)))
+       ((= j ncols))
+     (fprintf port " ~a" ($ccdoubles-cplx-vector-ref O j)))
+   (fprintf port "]")
+   (do ((i 1 (fxadd1 i)))
+       ((= i nrows))
+     (fprintf port "\n [~a" ($ccdoubles-cplx-vector-ref O (infix i * ncols)))
+     (do ((j 1 (fxadd1 j)))
+	 ((= j ncols))
+       (fprintf port " ~a" ($ccdoubles-cplx-vector-ref O (infix i * ncols + j))))
+     (fprintf port "]"))
+   (fprintf port "]\n")))
+
+(case-define* ccdoubles-print
+  ((O)
+   (ccdoubles-print O (current-output-port)))
+  ((O {port textual-output-port?})
+   (cond ((ccdoubles-real-vector? O)
+	  (ccdoubles-real-vector-print O port))
+	 ((ccdoubles-cplx-vector? O)
+	  (ccdoubles-cplx-vector-print O port))
+	 ((ccdoubles-real-matrix? O)
+	  (ccdoubles-real-matrix-print O port))
+	 ((ccdoubles-cplx-matrix? O)
+	  (ccdoubles-cplx-matrix-print O port))
+	 (else
+	  (procedure-argument-violation __who__
+	    "expected ccdoubles object instance" O)))))
 
 
 ;;;; done

@@ -1165,6 +1165,17 @@
   (collect))
 
 
+(parametrise ((check-test-name	'printing))
+
+  (ccdoubles-print (vector->ccdoubles-real-vector '#(1 2 3)))
+  (ccdoubles-print (vector->ccdoubles-cplx-vector '#(1+2i 2+3i 3+4i)))
+  (ccdoubles-print (vector->ccdoubles-real-matrix 2 3 '#(1 2 3  4 5 6)))
+  (ccdoubles-print (vector->ccdoubles-cplx-matrix 2 3 '#(1+2i 2+3i 3+4i  4+5i 5+6i 6+7i)))
+  (flush-output-port (current-output-port))
+
+  (collect))
+
+
 ;;;; done
 
 (collect 'fullest)
