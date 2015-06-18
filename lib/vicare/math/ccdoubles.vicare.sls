@@ -1612,23 +1612,19 @@
 			      ($ccdoubles-cplx-vector-pointer cvec)))
 
 
-(define* (ccdoubles-cplx-vector-magnitude {R  ccdoubles-real-vector?/alive}
-					  {O1 ccdoubles-cplx-vector?/alive}
-					  {O2 ccdoubles-cplx-vector?/alive})
-  (ccdoubles-real-cplx-cplx-vectors-same-length R O1 O2)
+(define* (ccdoubles-cplx-vector-magnitude {R ccdoubles-real-vector?/alive}
+					  {O ccdoubles-cplx-vector?/alive})
+  (ccdoubles-real-cplx-vectors-same-length R O)
   (ccdoubles_cplx_vector_magnitude ($ccdoubles-real-vector-nslots  R)
 				   ($ccdoubles-real-vector-pointer R)
-				   ($ccdoubles-cplx-vector-pointer O1)
-				   ($ccdoubles-cplx-vector-pointer O2)))
+				   ($ccdoubles-cplx-vector-pointer O)))
 
-(define* (ccdoubles-cplx-vector-angle {R  ccdoubles-real-vector?/alive}
-				      {O1 ccdoubles-cplx-vector?/alive}
-				      {O2 ccdoubles-cplx-vector?/alive})
-  (ccdoubles-real-cplx-cplx-vectors-same-length R O1 O2)
+(define* (ccdoubles-cplx-vector-angle {R ccdoubles-real-vector?/alive}
+				      {O ccdoubles-cplx-vector?/alive})
+  (ccdoubles-real-cplx-vectors-same-length R O)
   (ccdoubles_cplx_vector_angle ($ccdoubles-real-vector-nslots  R)
 			       ($ccdoubles-real-vector-pointer R)
-			       ($ccdoubles-cplx-vector-pointer O1)
-			       ($ccdoubles-cplx-vector-pointer O2)))
+			       ($ccdoubles-cplx-vector-pointer O)))
 
 (define-cplx-vector-op-1 ccdoubles-cplx-vector-conj		ccdoubles_cplx_vector_conj)
 
@@ -1777,25 +1773,21 @@
 			      ($ccdoubles-real-matrix-pointer rmat)
 			      ($ccdoubles-cplx-matrix-pointer cmat)))
 
-(define* (ccdoubles-cplx-matrix-magnitude {R  ccdoubles-real-matrix?/alive}
-					  {O1 ccdoubles-cplx-matrix?/alive}
-					  {O2 ccdoubles-cplx-matrix?/alive})
-  (ccdoubles-real-cplx-cplx-matrices-same-dimensions R O1 O2)
+(define* (ccdoubles-cplx-matrix-magnitude {R ccdoubles-real-matrix?/alive}
+					  {O ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-real-cplx-matrices-same-dimensions R O)
   (ccdoubles_cplx_matrix_magnitude ($ccdoubles-real-matrix-nrows   R)
 				   ($ccdoubles-real-matrix-ncols   R)
 				   ($ccdoubles-real-matrix-pointer R)
-				   ($ccdoubles-cplx-matrix-pointer O1)
-				   ($ccdoubles-cplx-matrix-pointer O2)))
+				   ($ccdoubles-cplx-matrix-pointer O)))
 
-(define* (ccdoubles-cplx-matrix-angle {R  ccdoubles-real-matrix?/alive}
-				      {O1 ccdoubles-cplx-matrix?/alive}
-				      {O2 ccdoubles-cplx-matrix?/alive})
-  (ccdoubles-real-cplx-cplx-matrices-same-dimensions R O1 O2)
+(define* (ccdoubles-cplx-matrix-angle {R ccdoubles-real-matrix?/alive}
+				      {O ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-real-cplx-matrices-same-dimensions R O)
   (ccdoubles_cplx_matrix_angle ($ccdoubles-real-matrix-nrows   R)
 			       ($ccdoubles-real-matrix-ncols   R)
 			       ($ccdoubles-real-matrix-pointer R)
-			       ($ccdoubles-cplx-matrix-pointer O1)
-			       ($ccdoubles-cplx-matrix-pointer O2)))
+			       ($ccdoubles-cplx-matrix-pointer O)))
 
 (define* (ccdoubles-cplx-matrix-from-rect {R  ccdoubles-cplx-matrix?/alive}
 					  {O1 ccdoubles-real-matrix?/alive}
