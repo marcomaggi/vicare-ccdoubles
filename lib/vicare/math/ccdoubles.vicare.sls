@@ -226,7 +226,7 @@
 
     ;; complex vectors
     ccdoubles-cplx-vector-clear
-    ccdoubles-cplx-vector-set-split
+    ccdoubles-cplx-vector-set
     ccdoubles-cplx-vector-copy
     ccdoubles-cplx-vector-real
     ccdoubles-cplx-vector-imag
@@ -240,9 +240,9 @@
     ccdoubles-cplx-vector-mul
     ccdoubles-cplx-vector-div
     ccdoubles-cplx-vector-neg
-    ccdoubles-cplx-vector-scalar-product-split
-    ccdoubles-cplx-vector-scalar-mul-split
-    ccdoubles-cplx-vector-linear-combination-split
+    ccdoubles-cplx-vector-scalar-product
+    ccdoubles-cplx-vector-scalar-mul
+    ccdoubles-cplx-vector-linear-combination
     ccdoubles-cplx-vector-exp
     ccdoubles-cplx-vector-log
     ccdoubles-cplx-vector-log10
@@ -263,7 +263,7 @@
 
     ;; complex matrices
     ccdoubles-cplx-matrix-clear
-    ccdoubles-cplx-matrix-set-split
+    ccdoubles-cplx-matrix-set
     ccdoubles-cplx-matrix-copy
     ccdoubles-cplx-matrix-real
     ccdoubles-cplx-matrix-imag
@@ -277,8 +277,8 @@
     ccdoubles-cplx-matrix-mul
     ccdoubles-cplx-matrix-div
     ccdoubles-cplx-matrix-neg
-    ccdoubles-cplx-matrix-scalar-mul-split
-    ccdoubles-cplx-matrix-linear-combination-split
+    ccdoubles-cplx-matrix-scalar-mul
+    ccdoubles-cplx-matrix-linear-combination
     ccdoubles-cplx-matrix-transpose
     ccdoubles-cplx-matrix-conjugate-transpose
     ccdoubles-cplx-matrix-rowcol-mul
@@ -473,8 +473,8 @@
   (ccdoubles-real-matrix-same-ncols ?rmat1 ?rmat3))
 
 (define-syntax-rule (ccdoubles-real-matrix-same-dimensions-3/comparison ?imat ?rmat1 ?rmat2)
-  (unless (let ((nrows ($ccdoubles-int-matrix-rows ?imat))
-		(ncols ($ccdoubles-int-matrix-cols ?imat)))
+  (unless (let ((nrows ($ccdoubles-int-matrix-nrows ?imat))
+		(ncols ($ccdoubles-int-matrix-ncols ?imat)))
 	    (and ($fx= nrows ($ccdoubles-real-matrix-nrows ?rmat1))
 		 ($fx= nrows ($ccdoubles-real-matrix-nrows ?rmat2))
 		 ($fx= ncols ($ccdoubles-real-matrix-ncols ?rmat1))
@@ -564,15 +564,69 @@
 ;;; --------------------------------------------------------------------
 ;;; integer matrices
 
-(define-syntax-rule (ccdoubles-int-matrix-and-row-index ?rmat ?rowidx)
-  (unless ($fx< ?rowidx ($ccdoubles-int-matrix-nrows ?rmat))
+(define-syntax-rule (ccdoubles-int-matrix-and-row-index ?imat ?rowidx)
+  (unless ($fx< ?rowidx ($ccdoubles-int-matrix-nrows ?imat))
     (procedure-arguments-consistency-violation __who__
-      "row index out of range for matrix" ?rmat ?rowidx)))
+      "row index out of range for matrix" ?imat ?rowidx)))
 
-(define-syntax-rule (ccdoubles-int-matrix-and-col-index ?rmat ?colidx)
-  (unless ($fx< ?colidx ($ccdoubles-int-matrix-ncols ?rmat))
+(define-syntax-rule (ccdoubles-int-matrix-and-col-index ?imat ?colidx)
+  (unless ($fx< ?colidx ($ccdoubles-int-matrix-ncols ?imat))
     (procedure-arguments-consistency-violation __who__
-      "column index out of range for matrix" ?rmat ?colidx)))
+      "column index out of range for matrix" ?imat ?colidx)))
+
+;;; --------------------------------------------------------------------
+;;; mixed vectors
+
+(define-syntax-rule (ccdoubles-real-cplx-vectors-same-length ?rvec ?cvec)
+  (unless ($fx= ($ccdoubles-real-vector-nslots ?rvec)
+		($ccdoubles-cplx-vector-nslots ?cvec))
+    (procedure-arguments-consistency-violation __who__
+      "vectors with different length" ?rvec ?cvec)))
+
+(define-syntax-rule (ccdoubles-real-cplx-cplx-vectors-same-length ?rvec ?cvec1 ?cvec2)
+  (unless (let ((len ($ccdoubles-real-vector-nslots ?rvec)))
+	    (and ($fx= len ($ccdoubles-cplx-vector-nslots ?cvec1))
+		 ($fx= len ($ccdoubles-cplx-vector-nslots ?cvec2))))
+    (procedure-arguments-consistency-violation __who__
+      "vectors with different length" ?rvec ?cvec1 ?cvec2)))
+
+(define-syntax-rule (ccdoubles-cplx-real-real-vectors-same-length ?cvec ?rvec1 ?rvec2)
+  (unless (let ((len ($ccdoubles-cplx-vector-nslots ?cvec)))
+	    (and ($fx= len ($ccdoubles-real-vector-nslots ?rvec1))
+		 ($fx= len ($ccdoubles-real-vector-nslots ?rvec2))))
+    (procedure-arguments-consistency-violation __who__
+      "vectors with different length" ?cvec ?rvec1 ?rvec2)))
+
+;;; --------------------------------------------------------------------
+;;; mixed matrices
+
+(define-syntax-rule (ccdoubles-real-cplx-matrices-same-dimensions ?rmat ?cmat)
+  (unless (and ($fx= ($ccdoubles-real-matrix-nrows ?rmat)
+		     ($ccdoubles-cplx-matrix-nrows ?cmat))
+	       ($fx= ($ccdoubles-real-matrix-ncols ?rmat)
+		     ($ccdoubles-cplx-matrix-ncols ?cmat)))
+    (procedure-arguments-consistency-violation __who__
+      "matrices with different length" ?rmat ?cmat)))
+
+(define-syntax-rule (ccdoubles-real-cplx-cplx-matrices-same-dimensions ?rmat ?cmat1 ?cmat2)
+  (unless (let ((nrows ($ccdoubles-real-matrix-nrows ?rmat))
+		(ncols ($ccdoubles-real-matrix-ncols ?rmat)))
+	    (and ($fx= nrows ($ccdoubles-cplx-matrix-nrows ?cmat1))
+		 ($fx= nrows ($ccdoubles-cplx-matrix-nrows ?cmat2))
+		 ($fx= ncols ($ccdoubles-cplx-matrix-ncols ?cmat1))
+		 ($fx= ncols ($ccdoubles-cplx-matrix-ncols ?cmat2))))
+    (procedure-arguments-consistency-violation __who__
+      "matrices with different length" ?rmat ?cmat1 ?cmat2)))
+
+(define-syntax-rule (ccdoubles-cplx-real-real-matrices-same-dimensions ?cmat ?rmat1 ?rmat2)
+  (unless (let ((nrows ($ccdoubles-cplx-matrix-nrows ?cmat))
+		(ncols ($ccdoubles-cplx-matrix-ncols ?cmat)))
+	    (and ($fx= nrows ($ccdoubles-real-matrix-nrows ?rmat1))
+		 ($fx= nrows ($ccdoubles-real-matrix-nrows ?rmat2))
+		 ($fx= ncols ($ccdoubles-real-matrix-ncols ?rmat1))
+		 ($fx= ncols ($ccdoubles-real-matrix-ncols ?rmat2))))
+    (procedure-arguments-consistency-violation __who__
+      "matrices with different length" ?cmat ?rmat1 ?rmat2)))
 
 
 ;;;; operations templates
@@ -619,17 +673,17 @@
 ;;; cplx vector operations templates
 
 (define-syntax-rule (define-cplx-vector-op-1 ?who ?low-who)
-  (define* (?who {R ccdoubles-cplx-vector?/cplx}
-		 {O ccdoubles-cplx-vector?/cplx})
+  (define* (?who {R ccdoubles-cplx-vector?/alive}
+		 {O ccdoubles-cplx-vector?/alive})
     (ccdoubles-cplx-vector-same-length-2 R O)
     (?low-who ($ccdoubles-cplx-vector-nslots  R)
 	      ($ccdoubles-cplx-vector-pointer R)
 	      ($ccdoubles-cplx-vector-pointer O))))
 
 (define-syntax-rule (define-cplx-vector-op-2 ?who ?low-who)
-  (define* (?who {R  ccdoubles-cplx-vector?/cplx}
-		 {O1 ccdoubles-cplx-vector?/cplx}
-		 {O2 ccdoubles-cplx-vector?/cplx})
+  (define* (?who {R  ccdoubles-cplx-vector?/alive}
+		 {O1 ccdoubles-cplx-vector?/alive}
+		 {O2 ccdoubles-cplx-vector?/alive})
     (ccdoubles-cplx-vector-same-length-3 R O1 O2)
     (?low-who ($ccdoubles-cplx-vector-nslots  R)
 	      ($ccdoubles-cplx-vector-pointer R)
@@ -643,7 +697,8 @@
   (define* (?who {R ccdoubles-real-matrix?/alive}
 		 {O ccdoubles-real-matrix?/alive})
     (ccdoubles-real-matrix-same-dimensions-2 R O)
-    (?low-who ($ccdoubles-real-matrix-nslots  R)
+    (?low-who ($ccdoubles-real-matrix-nrows   R)
+	      ($ccdoubles-real-matrix-ncols   R)
 	      ($ccdoubles-real-matrix-pointer R)
 	      ($ccdoubles-real-matrix-pointer O))))
 
@@ -682,17 +737,18 @@
 ;;; cplx matrix operations templates
 
 (define-syntax-rule (define-cplx-matrix-op-1 ?who ?low-who)
-  (define* (?who {R ccdoubles-cplx-matrix?/cplx}
-		 {O ccdoubles-cplx-matrix?/cplx})
+  (define* (?who {R ccdoubles-cplx-matrix?/alive}
+		 {O ccdoubles-cplx-matrix?/alive})
     (ccdoubles-real-matrix-same-dimensions-2 R O)
-    (?low-who ($ccdoubles-cplx-matrix-nslots  R)
+    (?low-who ($ccdoubles-cplx-matrix-nrows   R)
+	      ($ccdoubles-cplx-matrix-ncols   R)
 	      ($ccdoubles-cplx-matrix-pointer R)
 	      ($ccdoubles-cplx-matrix-pointer O))))
 
 (define-syntax-rule (define-cplx-matrix-op-2 ?who ?low-who)
-  (define* (?who {R  ccdoubles-cplx-matrix?/cplx}
-		 {O1 ccdoubles-cplx-matrix?/cplx}
-		 {O2 ccdoubles-cplx-matrix?/cplx})
+  (define* (?who {R  ccdoubles-cplx-matrix?/alive}
+		 {O1 ccdoubles-cplx-matrix?/alive}
+		 {O2 ccdoubles-cplx-matrix?/alive})
     (ccdoubles-real-matrix-same-dimensions-3 R O1 O2)
     (?low-who ($ccdoubles-cplx-matrix-nrows   R)
 	      ($ccdoubles-cplx-matrix-ncols   R)
@@ -1320,12 +1376,16 @@
 (define* (ccdoubles-real-vector-linspace {R ccdoubles-real-vector?/alive}
 					 {start flonum?}
 					 {past  flonum?})
-  (ccdoubles_real_vector_linspace ($ccdoubles-real-vector-nslots R) start past))
+  (ccdoubles_real_vector_linspace ($ccdoubles-real-vector-nslots  R)
+				  ($ccdoubles-real-vector-pointer R)
+				  start past))
 
 (define* (ccdoubles-real-vector-logspace {R ccdoubles-real-vector?/alive}
 					 {start flonum?}
 					 {past  flonum?})
-  (ccdoubles_real_vector_logspace ($ccdoubles-real-vector-nslots R) start past))
+  (ccdoubles_real_vector_logspace ($ccdoubles-real-vector-nslots  R)
+				  ($ccdoubles-real-vector-pointer R)
+				  start past))
 
 ;;; --------------------------------------------------------------------
 ;;; exponentiation and logarithms
@@ -1370,147 +1430,486 @@
 
 ;;;; high-level API: real matrices
 
-(define ccdoubles-real-matrix-clear			ccdoubles_real_matrix_clear)
-(define ccdoubles-real-matrix-set			ccdoubles_real_matrix_set)
-(define ccdoubles-real-matrix-copy			ccdoubles_real_matrix_copy)
-(define ccdoubles-real-matrix-add			ccdoubles_real_matrix_add)
-(define ccdoubles-real-matrix-sub			ccdoubles_real_matrix_sub)
-(define ccdoubles-real-matrix-mul			ccdoubles_real_matrix_mul)
-(define ccdoubles-real-matrix-div			ccdoubles_real_matrix_div)
-(define ccdoubles-real-matrix-neg			ccdoubles_real_matrix_neg)
-(define ccdoubles-real-matrix-abs			ccdoubles_real_matrix_abs)
-(define ccdoubles-real-matrix-fmod			ccdoubles_real_matrix_fmod)
-(define ccdoubles-real-matrix-drem			ccdoubles_real_matrix_drem)
-(define ccdoubles-real-matrix-remainder			ccdoubles_real_matrix_remainder)
-(define ccdoubles-real-matrix-ceil			ccdoubles_real_matrix_ceil)
-(define ccdoubles-real-matrix-floor			ccdoubles_real_matrix_floor)
-(define ccdoubles-real-matrix-trunc			ccdoubles_real_matrix_trunc)
-(define ccdoubles-real-matrix-round			ccdoubles_real_matrix_round)
-(define ccdoubles-real-matrix-rint			ccdoubles_real_matrix_rint)
-(define ccdoubles-real-matrix-isgreater			ccdoubles_real_matrix_isgreater)
-(define ccdoubles-real-matrix-isgreaterequal		ccdoubles_real_matrix_isgreaterequal)
-(define ccdoubles-real-matrix-isless			ccdoubles_real_matrix_isless)
-(define ccdoubles-real-matrix-islessequal		ccdoubles_real_matrix_islessequal)
-(define ccdoubles-real-matrix-islessgreater		ccdoubles_real_matrix_islessgreater)
-(define ccdoubles-real-matrix-isunordered		ccdoubles_real_matrix_isunordered)
-(define ccdoubles-real-matrix-min			ccdoubles_real_matrix_min)
-(define ccdoubles-real-matrix-max			ccdoubles_real_matrix_max)
-(define ccdoubles-real-matrix-fpclassify		ccdoubles_real_matrix_fpclassify)
-(define ccdoubles-real-matrix-isfinite			ccdoubles_real_matrix_isfinite)
-(define ccdoubles-real-matrix-isinfinite		ccdoubles_real_matrix_isinfinite)
-(define ccdoubles-real-matrix-isnormal			ccdoubles_real_matrix_isnormal)
-(define ccdoubles-real-matrix-isnan			ccdoubles_real_matrix_isnan)
-(define ccdoubles-real-matrix-scalar-mul		ccdoubles_real_matrix_scalar_mul)
-(define ccdoubles-real-matrix-linear-combination	ccdoubles_real_matrix_linear_combination)
-(define ccdoubles-real-matrix-transpose			ccdoubles_real_matrix_transpose)
-(define ccdoubles-real-matrix-rowcol-mul		ccdoubles_real_matrix_rowcol_mul)
-(define ccdoubles-real-matrix-linspace			ccdoubles_real_matrix_linspace)
-(define ccdoubles-real-matrix-exp			ccdoubles_real_matrix_exp)
-(define ccdoubles-real-matrix-exp10			ccdoubles_real_matrix_exp10)
-(define ccdoubles-real-matrix-exp2			ccdoubles_real_matrix_exp2)
-(define ccdoubles-real-matrix-log			ccdoubles_real_matrix_log)
-(define ccdoubles-real-matrix-log10			ccdoubles_real_matrix_log10)
-(define ccdoubles-real-matrix-log2			ccdoubles_real_matrix_log2)
-(define ccdoubles-real-matrix-logb			ccdoubles_real_matrix_logb)
-(define ccdoubles-real-matrix-pow			ccdoubles_real_matrix_pow)
-(define ccdoubles-real-matrix-sqrt			ccdoubles_real_matrix_sqrt)
-(define ccdoubles-real-matrix-cbrt			ccdoubles_real_matrix_cbrt)
-(define ccdoubles-real-matrix-hypot			ccdoubles_real_matrix_hypot)
-(define ccdoubles-real-matrix-expm1			ccdoubles_real_matrix_expm1)
-(define ccdoubles-real-matrix-log1p			ccdoubles_real_matrix_log1p)
-(define ccdoubles-real-matrix-sin			ccdoubles_real_matrix_sin)
-(define ccdoubles-real-matrix-cos			ccdoubles_real_matrix_cos)
-(define ccdoubles-real-matrix-tan			ccdoubles_real_matrix_tan)
-(define ccdoubles-real-matrix-asin			ccdoubles_real_matrix_asin)
-(define ccdoubles-real-matrix-acos			ccdoubles_real_matrix_acos)
-(define ccdoubles-real-matrix-atan			ccdoubles_real_matrix_atan)
-(define ccdoubles-real-matrix-atan2			ccdoubles_real_matrix_atan2)
-(define ccdoubles-real-matrix-sinh			ccdoubles_real_matrix_sinh)
-(define ccdoubles-real-matrix-cosh			ccdoubles_real_matrix_cosh)
-(define ccdoubles-real-matrix-tanh			ccdoubles_real_matrix_tanh)
-(define ccdoubles-real-matrix-asinh			ccdoubles_real_matrix_asinh)
-(define ccdoubles-real-matrix-acosh			ccdoubles_real_matrix_acosh)
-(define ccdoubles-real-matrix-atanh			ccdoubles_real_matrix_atanh)
+;;; basic
+
+(define* (ccdoubles-real-matrix-clear {rmat ccdoubles-real-matrix?/alive})
+  (ccdoubles_real_matrix_clear ($ccdoubles-real-matrix-nrows   rmat)
+			       ($ccdoubles-real-matrix-ncols   rmat)
+			       ($ccdoubles-real-matrix-pointer rmat)))
+
+(define* (ccdoubles-real-matrix-set {rmat ccdoubles-real-matrix?/alive} {val flonum?})
+  (ccdoubles_real_matrix_set ($ccdoubles-real-matrix-nrows   rmat)
+			     ($ccdoubles-real-matrix-ncols   rmat)
+			     ($ccdoubles-real-matrix-pointer rmat)
+			     val))
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-copy		ccdoubles_real_matrix_copy)
+
+;;; --------------------------------------------------------------------
+;;; arithmetic
+
+(define-real-matrix-op-2 ccdoubles-real-matrix-add		ccdoubles_real_matrix_add)
+(define-real-matrix-op-2 ccdoubles-real-matrix-sub		ccdoubles_real_matrix_sub)
+(define-real-matrix-op-2 ccdoubles-real-matrix-mul		ccdoubles_real_matrix_mul)
+(define-real-matrix-op-2 ccdoubles-real-matrix-div		ccdoubles_real_matrix_div)
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-neg		ccdoubles_real_matrix_neg)
+(define-real-matrix-op-1 ccdoubles-real-matrix-abs		ccdoubles_real_matrix_abs)
+
+(define-real-matrix-op-2 ccdoubles-real-matrix-fmod		ccdoubles_real_matrix_fmod)
+(define-real-matrix-op-2 ccdoubles-real-matrix-drem		ccdoubles_real_matrix_drem)
+(define-real-matrix-op-2 ccdoubles-real-matrix-remainder	ccdoubles_real_matrix_remainder)
+
+;;; --------------------------------------------------------------------
+;;; rounding
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-ceil		ccdoubles_real_matrix_ceil)
+(define-real-matrix-op-1 ccdoubles-real-matrix-floor		ccdoubles_real_matrix_floor)
+(define-real-matrix-op-1 ccdoubles-real-matrix-trunc		ccdoubles_real_matrix_trunc)
+(define-real-matrix-op-1 ccdoubles-real-matrix-round		ccdoubles_real_matrix_round)
+(define-real-matrix-op-1 ccdoubles-real-matrix-rint		ccdoubles_real_matrix_rint)
+
+;;; --------------------------------------------------------------------
+;;; comparison
+
+(define-real-matrix-comp ccdoubles-real-matrix-isgreater	ccdoubles_real_matrix_isgreater)
+(define-real-matrix-comp ccdoubles-real-matrix-isgreaterequal	ccdoubles_real_matrix_isgreaterequal)
+(define-real-matrix-comp ccdoubles-real-matrix-isless		ccdoubles_real_matrix_isless)
+(define-real-matrix-comp ccdoubles-real-matrix-islessequal	ccdoubles_real_matrix_islessequal)
+(define-real-matrix-comp ccdoubles-real-matrix-islessgreater	ccdoubles_real_matrix_islessgreater)
+(define-real-matrix-comp ccdoubles-real-matrix-isunordered	ccdoubles_real_matrix_isunordered)
+(define-real-matrix-op-2 ccdoubles-real-matrix-min		ccdoubles_real_matrix_min)
+(define-real-matrix-op-2 ccdoubles-real-matrix-max		ccdoubles_real_matrix_max)
+
+;;; --------------------------------------------------------------------
+;;; inspection
+
+(define-real-matrix-clas ccdoubles-real-matrix-fpclassify	ccdoubles_real_matrix_fpclassify)
+(define-real-matrix-clas ccdoubles-real-matrix-isfinite		ccdoubles_real_matrix_isfinite)
+(define-real-matrix-clas ccdoubles-real-matrix-isinfinite	ccdoubles_real_matrix_isinfinite)
+(define-real-matrix-clas ccdoubles-real-matrix-isnormal		ccdoubles_real_matrix_isnormal)
+(define-real-matrix-clas ccdoubles-real-matrix-isnan		ccdoubles_real_matrix_isnan)
+
+;;; --------------------------------------------------------------------
+;;; special
+
+(define* (ccdoubles-real-matrix-scalar-mul {R ccdoubles-real-matrix?/alive}
+					   {L flonum?}
+					   {O ccdoubles-real-matrix?/alive})
+  (ccdoubles-real-matrix-same-dimensions-2 R O)
+  (ccdoubles_real_matrix_scalar_mul ($ccdoubles-real-matrix-nrows   R)
+				    ($ccdoubles-real-matrix-ncols   R)
+				    ($ccdoubles-real-matrix-pointer R)
+				    L
+				    ($ccdoubles-real-matrix-pointer O)))
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-transpose	ccdoubles_real_matrix_transpose)
+
+(define* (ccdoubles-real-matrix-rowcol-mul {R  ccdoubles-real-matrix?/alive}
+					   {O1 ccdoubles-real-matrix?/alive}
+					   {O2 ccdoubles-real-matrix?/alive})
+  (ccdoubles-real-matrix-product-dimensions R O1 O2)
+  (ccdoubles_real_matrix_rowcol_mul ($ccdoubles-real-matrix-nrows R)
+				    ($ccdoubles-real-matrix-ncols O1)
+				    ($ccdoubles-real-matrix-ncols R)
+				    ($ccdoubles-real-matrix-pointer R)
+				    ($ccdoubles-real-matrix-pointer O1)
+				    ($ccdoubles-real-matrix-pointer O1)))
+
+(define* (ccdoubles-real-matrix-linear-combination {R ccdoubles-real-matrix?/alive}
+						   {A flonum?}
+						   {O1 ccdoubles-real-matrix?/alive}
+						   {B flonum?}
+						   {O2 ccdoubles-real-matrix?/alive})
+  (ccdoubles-real-matrix-same-dimensions-3 R O1 O2)
+  (ccdoubles_real_matrix_linear_combination ($ccdoubles-real-matrix-nrows   R)
+					    ($ccdoubles-real-matrix-ncols   R)
+					    ($ccdoubles-real-matrix-pointer R)
+					    A
+					    ($ccdoubles-real-matrix-pointer O1)
+					    B
+					    ($ccdoubles-real-matrix-pointer O2)))
+
+(define* (ccdoubles-real-matrix-linspace {R ccdoubles-real-matrix?/alive}
+					 {start     flonum?}
+					 {row-past  flonum?}
+					 {col-past  flonum?})
+  (ccdoubles_real_matrix_linspace ($ccdoubles-real-matrix-nrows   R)
+				  ($ccdoubles-real-matrix-ncols   R)
+				  ($ccdoubles-real-matrix-pointer R)
+				  start row-past col-past))
+
+;;; --------------------------------------------------------------------
+;;; exponentiation and logarithms
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-exp	ccdoubles_real_matrix_exp)
+(define-real-matrix-op-1 ccdoubles-real-matrix-exp10	ccdoubles_real_matrix_exp10)
+(define-real-matrix-op-1 ccdoubles-real-matrix-exp2	ccdoubles_real_matrix_exp2)
+(define-real-matrix-op-1 ccdoubles-real-matrix-log	ccdoubles_real_matrix_log)
+(define-real-matrix-op-1 ccdoubles-real-matrix-log10	ccdoubles_real_matrix_log10)
+(define-real-matrix-op-1 ccdoubles-real-matrix-log2	ccdoubles_real_matrix_log2)
+(define-real-matrix-op-1 ccdoubles-real-matrix-logb	ccdoubles_real_matrix_logb)
+
+(define-real-matrix-op-2 ccdoubles-real-matrix-pow	ccdoubles_real_matrix_pow)
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-sqrt	ccdoubles_real_matrix_sqrt)
+(define-real-matrix-op-1 ccdoubles-real-matrix-cbrt	ccdoubles_real_matrix_cbrt)
+(define-real-matrix-op-1 ccdoubles-real-matrix-hypot	ccdoubles_real_matrix_hypot)
+(define-real-matrix-op-1 ccdoubles-real-matrix-expm1	ccdoubles_real_matrix_expm1)
+(define-real-matrix-op-1 ccdoubles-real-matrix-log1p	ccdoubles_real_matrix_log1p)
+
+;;; --------------------------------------------------------------------
+;;; trigonometric
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-sin	ccdoubles_real_matrix_sin)
+(define-real-matrix-op-1 ccdoubles-real-matrix-cos	ccdoubles_real_matrix_cos)
+(define-real-matrix-op-1 ccdoubles-real-matrix-tan	ccdoubles_real_matrix_tan)
+(define-real-matrix-op-1 ccdoubles-real-matrix-asin	ccdoubles_real_matrix_asin)
+(define-real-matrix-op-1 ccdoubles-real-matrix-acos	ccdoubles_real_matrix_acos)
+(define-real-matrix-op-1 ccdoubles-real-matrix-atan	ccdoubles_real_matrix_atan)
+(define-real-matrix-op-1 ccdoubles-real-matrix-atan2	ccdoubles_real_matrix_atan2)
+
+;;; --------------------------------------------------------------------
+;;; hyperbolic
+
+(define-real-matrix-op-1 ccdoubles-real-matrix-sinh	ccdoubles_real_matrix_sinh)
+(define-real-matrix-op-1 ccdoubles-real-matrix-cosh	ccdoubles_real_matrix_cosh)
+(define-real-matrix-op-1 ccdoubles-real-matrix-tanh	ccdoubles_real_matrix_tanh)
+(define-real-matrix-op-1 ccdoubles-real-matrix-asinh	ccdoubles_real_matrix_asinh)
+(define-real-matrix-op-1 ccdoubles-real-matrix-acosh	ccdoubles_real_matrix_acosh)
+(define-real-matrix-op-1 ccdoubles-real-matrix-atanh	ccdoubles_real_matrix_atanh)
 
 
 ;;;; high-level API: complex vectors
 
-(define ccdoubles-cplx-vector-clear			ccdoubles_cplx_vector_clear)
-(define ccdoubles-cplx-vector-set-split			ccdoubles_cplx_vector_set_split)
-(define ccdoubles-cplx-vector-copy			ccdoubles_cplx_vector_copy)
-(define ccdoubles-cplx-vector-real			ccdoubles_cplx_vector_real)
-(define ccdoubles-cplx-vector-imag			ccdoubles_cplx_vector_imag)
-(define ccdoubles-cplx-vector-magnitude			ccdoubles_cplx_vector_magnitude)
-(define ccdoubles-cplx-vector-angle			ccdoubles_cplx_vector_angle)
-(define ccdoubles-cplx-vector-conj			ccdoubles_cplx_vector_conj)
-(define ccdoubles-cplx-vector-from-rect			ccdoubles_cplx_vector_from_rect)
-(define ccdoubles-cplx-vector-from-polar		ccdoubles_cplx_vector_from_polar)
-(define ccdoubles-cplx-vector-add			ccdoubles_cplx_vector_add)
-(define ccdoubles-cplx-vector-sub			ccdoubles_cplx_vector_sub)
-(define ccdoubles-cplx-vector-mul			ccdoubles_cplx_vector_mul)
-(define ccdoubles-cplx-vector-div			ccdoubles_cplx_vector_div)
-(define ccdoubles-cplx-vector-neg			ccdoubles_cplx_vector_neg)
-(define ccdoubles-cplx-vector-scalar-product-split	ccdoubles_cplx_vector_scalar_product_split)
-(define ccdoubles-cplx-vector-scalar-mul-split		ccdoubles_cplx_vector_scalar_mul_split)
-(define ccdoubles-cplx-vector-linear-combination-split	ccdoubles_cplx_vector_linear_combination_split)
-(define ccdoubles-cplx-vector-exp			ccdoubles_cplx_vector_exp)
-(define ccdoubles-cplx-vector-log			ccdoubles_cplx_vector_log)
-(define ccdoubles-cplx-vector-log10			ccdoubles_cplx_vector_log10)
-(define ccdoubles-cplx-vector-sqrt			ccdoubles_cplx_vector_sqrt)
-(define ccdoubles-cplx-vector-pow			ccdoubles_cplx_vector_pow)
-(define ccdoubles-cplx-vector-sin			ccdoubles_cplx_vector_sin)
-(define ccdoubles-cplx-vector-cos			ccdoubles_cplx_vector_cos)
-(define ccdoubles-cplx-vector-tan			ccdoubles_cplx_vector_tan)
-(define ccdoubles-cplx-vector-asin			ccdoubles_cplx_vector_asin)
-(define ccdoubles-cplx-vector-acos			ccdoubles_cplx_vector_acos)
-(define ccdoubles-cplx-vector-atan			ccdoubles_cplx_vector_atan)
-(define ccdoubles-cplx-vector-sinh			ccdoubles_cplx_vector_sinh)
-(define ccdoubles-cplx-vector-cosh			ccdoubles_cplx_vector_cosh)
-(define ccdoubles-cplx-vector-tanh			ccdoubles_cplx_vector_tanh)
-(define ccdoubles-cplx-vector-asinh			ccdoubles_cplx_vector_asinh)
-(define ccdoubles-cplx-vector-acosh			ccdoubles_cplx_vector_acosh)
-(define ccdoubles-cplx-vector-atanh			ccdoubles_cplx_vector_atanh)
+;;; basic
+
+(define* (ccdoubles-cplx-vector-clear {cvec ccdoubles-cplx-vector?/alive})
+  (ccdoubles_cplx_vector_clear ($ccdoubles-cplx-vector-nslots  cvec)
+			       ($ccdoubles-cplx-vector-pointer cvec)))
+
+(define* (ccdoubles-cplx-vector-set {cvec ccdoubles-cplx-vector?/alive} {val complex?})
+  (let ((val (inexact val)))
+    (ccdoubles_cplx_vector_set_split ($ccdoubles-cplx-vector-nslots  cvec)
+				     ($ccdoubles-cplx-vector-pointer cvec)
+				     (real-part val)
+				     (imag-part val))))
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-copy		ccdoubles_cplx_vector_copy)
+
+(define* (ccdoubles-cplx-vector-real {rvec ccdoubles-real-vector?/alive}
+				     {cvec ccdoubles-cplx-vector?/alive})
+  (ccdoubles-real-cplx-vectors-same-length rvec cvec)
+  (ccdoubles_cplx_vector_real ($ccdoubles-real-vector-nslots  rvec)
+			      ($ccdoubles-real-vector-pointer rvec)
+			      ($ccdoubles-cplx-vector-pointer cvec)))
+
+(define* (ccdoubles-cplx-vector-imag {rvec ccdoubles-real-vector?/alive}
+				     {cvec ccdoubles-cplx-vector?/alive})
+  (ccdoubles-real-cplx-vectors-same-length rvec cvec)
+  (ccdoubles_cplx_vector_imag ($ccdoubles-real-vector-nslots  rvec)
+			      ($ccdoubles-real-vector-pointer rvec)
+			      ($ccdoubles-cplx-vector-pointer cvec)))
+
+
+(define* (ccdoubles-cplx-vector-magnitude {R  ccdoubles-real-vector?/alive}
+					  {O1 ccdoubles-cplx-vector?/alive}
+					  {O2 ccdoubles-cplx-vector?/alive})
+  (ccdoubles-real-cplx-cplx-vectors-same-length R O1 O2)
+  (ccdoubles_cplx_vector_magnitude ($ccdoubles-real-vector-nslots  R)
+				   ($ccdoubles-real-vector-pointer R)
+				   ($ccdoubles-cplx-vector-pointer O1)
+				   ($ccdoubles-cplx-vector-pointer O2)))
+
+(define* (ccdoubles-cplx-vector-angle {R  ccdoubles-real-vector?/alive}
+				      {O1 ccdoubles-cplx-vector?/alive}
+				      {O2 ccdoubles-cplx-vector?/alive})
+  (ccdoubles-real-cplx-cplx-vectors-same-length R O1 O2)
+  (ccdoubles_cplx_vector_angle ($ccdoubles-real-vector-nslots  R)
+			       ($ccdoubles-real-vector-pointer R)
+			       ($ccdoubles-cplx-vector-pointer O1)
+			       ($ccdoubles-cplx-vector-pointer O2)))
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-conj		ccdoubles_cplx_vector_conj)
+
+(define* (ccdoubles-cplx-vector-from-rect {R  ccdoubles-cplx-vector?/alive}
+					  {O1 ccdoubles-real-vector?/alive}
+					  {O2 ccdoubles-real-vector?/alive})
+  (ccdoubles-cplx-real-real-vectors-same-length R O1 O2)
+  (ccdoubles_cplx_vector_from_rect ($ccdoubles-cplx-vector-nslots  R)
+				   ($ccdoubles-cplx-vector-pointer R)
+				   ($ccdoubles-real-vector-pointer O1)
+				   ($ccdoubles-real-vector-pointer O2)))
+
+(define* (ccdoubles-cplx-vector-from-polar {R  ccdoubles-cplx-vector?/alive}
+					   {O1 ccdoubles-real-vector?/alive}
+					   {O2 ccdoubles-real-vector?/alive})
+  (ccdoubles-cplx-real-real-vectors-same-length R O1 O2)
+  (ccdoubles_cplx_vector_from_polar ($ccdoubles-cplx-vector-nslots  R)
+				    ($ccdoubles-cplx-vector-pointer R)
+				    ($ccdoubles-real-vector-pointer O1)
+				    ($ccdoubles-real-vector-pointer O2)))
+
+;;; --------------------------------------------------------------------
+;;; arithmetic
+
+(define-cplx-vector-op-2 ccdoubles-cplx-vector-add		ccdoubles_cplx_vector_add)
+(define-cplx-vector-op-2 ccdoubles-cplx-vector-sub		ccdoubles_cplx_vector_sub)
+(define-cplx-vector-op-2 ccdoubles-cplx-vector-mul		ccdoubles_cplx_vector_mul)
+(define-cplx-vector-op-2 ccdoubles-cplx-vector-div		ccdoubles_cplx_vector_div)
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-neg		ccdoubles_cplx_vector_neg)
+
+;;; --------------------------------------------------------------------
+;;; special
+
+(define* (ccdoubles-cplx-vector-scalar-product {O1 ccdoubles-cplx-vector?/alive}
+					       {O2 ccdoubles-cplx-vector?/alive})
+  (ccdoubles-cplx-vector-same-length-2 O1 O2)
+  (let ((R (guarded-malloc SIZEOF-DOUBLE-COMPLEX)))
+    (ccdoubles_cplx_vector_scalar_product_split ($ccdoubles-cplx-vector-nslots  O1)
+						R
+						($ccdoubles-cplx-vector-pointer O1)
+						($ccdoubles-cplx-vector-pointer O2))
+    (%pointer-ref-c-double-complex R 0)))
+
+(define* (ccdoubles-cplx-vector-scalar-mul {R ccdoubles-cplx-vector?/alive}
+					   {L complex?}
+					   {O ccdoubles-cplx-vector?/alive})
+  (ccdoubles-cplx-vector-same-length-2 R O)
+  (let ((L (inexact L)))
+    (ccdoubles_cplx_vector_scalar_mul_split ($ccdoubles-cplx-vector-nslots R)
+					    ($ccdoubles-cplx-vector-pointer R)
+					    (real-part L)
+					    (imag-part L)
+					    ($ccdoubles-cplx-vector-pointer O))))
+
+(define* (ccdoubles-cplx-vector-linear-combination {R ccdoubles-cplx-vector?/alive}
+						   {A complex?}
+						   {O1 ccdoubles-cplx-vector?/alive}
+						   {B complex?}
+						   {O2 ccdoubles-cplx-vector?/alive})
+  (ccdoubles-cplx-vector-same-length-3 R O1 O2)
+  (let ((A (inexact A))
+	(B (inexact B)))
+    (ccdoubles_cplx_vector_linear_combination_split ($ccdoubles-cplx-vector-nslots R)
+						    ($ccdoubles-cplx-vector-pointer R)
+						    (real-part A)
+						    (imag-part A)
+						    ($ccdoubles-cplx-vector-pointer O1)
+						    (real-part B)
+						    (imag-part B)
+						    ($ccdoubles-cplx-vector-pointer O2))))
+
+;;; --------------------------------------------------------------------
+;;; exponentiation and logarithms
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-exp	ccdoubles_cplx_vector_exp)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-exp10	ccdoubles_cplx_vector_exp10)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-exp2	ccdoubles_cplx_vector_exp2)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-log	ccdoubles_cplx_vector_log)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-log10	ccdoubles_cplx_vector_log10)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-log2	ccdoubles_cplx_vector_log2)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-logb	ccdoubles_cplx_vector_logb)
+
+(define-cplx-vector-op-2 ccdoubles-cplx-vector-pow	ccdoubles_cplx_vector_pow)
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-sqrt	ccdoubles_cplx_vector_sqrt)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-cbrt	ccdoubles_cplx_vector_cbrt)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-hypot	ccdoubles_cplx_vector_hypot)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-expm1	ccdoubles_cplx_vector_expm1)
+;;(define-cplx-vector-op-1 ccdoubles-cplx-vector-log1p	ccdoubles_cplx_vector_log1p)
+
+;;; --------------------------------------------------------------------
+;;; trigonometric
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-sin	ccdoubles_cplx_vector_sin)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-cos	ccdoubles_cplx_vector_cos)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-tan	ccdoubles_cplx_vector_tan)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-asin	ccdoubles_cplx_vector_asin)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-acos	ccdoubles_cplx_vector_acos)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-atan	ccdoubles_cplx_vector_atan)
+
+;;; --------------------------------------------------------------------
+;;; hyperbolic
+
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-sinh	ccdoubles_cplx_vector_sinh)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-cosh	ccdoubles_cplx_vector_cosh)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-tanh	ccdoubles_cplx_vector_tanh)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-asinh	ccdoubles_cplx_vector_asinh)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-acosh	ccdoubles_cplx_vector_acosh)
+(define-cplx-vector-op-1 ccdoubles-cplx-vector-atanh	ccdoubles_cplx_vector_atanh)
+
 
 
 ;;;; high-level API: complex matrices
 
-(define ccdoubles-cplx-matrix-clear			ccdoubles_cplx_matrix_clear)
-(define ccdoubles-cplx-matrix-set-split			ccdoubles_cplx_matrix_set_split)
-(define ccdoubles-cplx-matrix-copy			ccdoubles_cplx_matrix_copy)
-(define ccdoubles-cplx-matrix-real			ccdoubles_cplx_matrix_real)
-(define ccdoubles-cplx-matrix-imag			ccdoubles_cplx_matrix_imag)
-(define ccdoubles-cplx-matrix-magnitude			ccdoubles_cplx_matrix_magnitude)
-(define ccdoubles-cplx-matrix-angle			ccdoubles_cplx_matrix_angle)
-(define ccdoubles-cplx-matrix-conj			ccdoubles_cplx_matrix_conj)
-(define ccdoubles-cplx-matrix-from-rect			ccdoubles_cplx_matrix_from_rect)
-(define ccdoubles-cplx-matrix-from-polar		ccdoubles_cplx_matrix_from_polar)
-(define ccdoubles-cplx-matrix-add			ccdoubles_cplx_matrix_add)
-(define ccdoubles-cplx-matrix-sub			ccdoubles_cplx_matrix_sub)
-(define ccdoubles-cplx-matrix-mul			ccdoubles_cplx_matrix_mul)
-(define ccdoubles-cplx-matrix-div			ccdoubles_cplx_matrix_div)
-(define ccdoubles-cplx-matrix-neg			ccdoubles_cplx_matrix_neg)
-(define ccdoubles-cplx-matrix-scalar-mul-split		ccdoubles_cplx_matrix_scalar_mul_split)
-(define ccdoubles-cplx-matrix-linear-combination-split	ccdoubles_cplx_matrix_linear_combination_split)
-(define ccdoubles-cplx-matrix-transpose			ccdoubles_cplx_matrix_transpose)
-(define ccdoubles-cplx-matrix-conjugate-transpose	ccdoubles_cplx_matrix_conjugate_transpose)
-(define ccdoubles-cplx-matrix-rowcol-mul		ccdoubles_cplx_matrix_rowcol_mul)
-(define ccdoubles-cplx-matrix-exp			ccdoubles_cplx_matrix_exp)
-(define ccdoubles-cplx-matrix-log			ccdoubles_cplx_matrix_log)
-(define ccdoubles-cplx-matrix-log10			ccdoubles_cplx_matrix_log10)
-(define ccdoubles-cplx-matrix-sqrt			ccdoubles_cplx_matrix_sqrt)
-(define ccdoubles-cplx-matrix-pow			ccdoubles_cplx_matrix_pow)
-(define ccdoubles-cplx-matrix-sin			ccdoubles_cplx_matrix_sin)
-(define ccdoubles-cplx-matrix-cos			ccdoubles_cplx_matrix_cos)
-(define ccdoubles-cplx-matrix-tan			ccdoubles_cplx_matrix_tan)
-(define ccdoubles-cplx-matrix-asin			ccdoubles_cplx_matrix_asin)
-(define ccdoubles-cplx-matrix-acos			ccdoubles_cplx_matrix_acos)
-(define ccdoubles-cplx-matrix-atan			ccdoubles_cplx_matrix_atan)
-(define ccdoubles-cplx-matrix-sinh			ccdoubles_cplx_matrix_sinh)
-(define ccdoubles-cplx-matrix-cosh			ccdoubles_cplx_matrix_cosh)
-(define ccdoubles-cplx-matrix-tanh			ccdoubles_cplx_matrix_tanh)
-(define ccdoubles-cplx-matrix-asinh			ccdoubles_cplx_matrix_asinh)
-(define ccdoubles-cplx-matrix-acosh			ccdoubles_cplx_matrix_acosh)
-(define ccdoubles-cplx-matrix-atanh			ccdoubles_cplx_matrix_atanh)
+;;; basic
+
+(define* (ccdoubles-cplx-matrix-clear {cmat ccdoubles-cplx-matrix?/alive})
+  (ccdoubles_cplx_matrix_clear ($ccdoubles-cplx-matrix-nrows   cmat)
+			       ($ccdoubles-cplx-matrix-ncols   cmat)
+			       ($ccdoubles-cplx-matrix-pointer cmat)))
+
+(define* (ccdoubles-cplx-matrix-set {cmat ccdoubles-cplx-matrix?/alive} {val complex?})
+  (let ((val (inexact val)))
+    (ccdoubles_cplx_matrix_set_split ($ccdoubles-cplx-matrix-nrows   cmat)
+				     ($ccdoubles-cplx-matrix-ncols   cmat)
+				     ($ccdoubles-cplx-matrix-pointer cmat)
+				     (real-part val)
+				     (imag-part val))))
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-copy		ccdoubles_cplx_matrix_copy)
+
+(define* (ccdoubles-cplx-matrix-real {rmat ccdoubles-real-matrix?/alive}
+				     {cmat ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-real-cplx-matrices-same-dimensions rmat cmat)
+  (ccdoubles_cplx_matrix_real ($ccdoubles-real-matrix-nrows   rmat)
+			      ($ccdoubles-real-matrix-ncols   rmat)
+			      ($ccdoubles-real-matrix-pointer cmat)
+			      ($ccdoubles-cplx-matrix-pointer cmat)))
+
+(define* (ccdoubles-cplx-matrix-imag {rmat ccdoubles-real-matrix?/alive}
+				     {cmat ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-real-cplx-matrices-same-dimensions rmat cmat)
+  (ccdoubles_cplx_matrix_imag ($ccdoubles-real-matrix-nrows   rmat)
+			      ($ccdoubles-real-matrix-ncols   rmat)
+			      ($ccdoubles-real-matrix-pointer rmat)
+			      ($ccdoubles-cplx-matrix-pointer cmat)))
+
+(define* (ccdoubles-cplx-matrix-magnitude {R  ccdoubles-real-matrix?/alive}
+					  {O1 ccdoubles-cplx-matrix?/alive}
+					  {O2 ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-real-cplx-cplx-matrices-same-dimensions R O1 O2)
+  (ccdoubles_cplx_matrix_magnitude ($ccdoubles-real-matrix-nrows   R)
+				   ($ccdoubles-real-matrix-ncols   R)
+				   ($ccdoubles-real-matrix-pointer R)
+				   ($ccdoubles-cplx-matrix-pointer O1)
+				   ($ccdoubles-cplx-matrix-pointer O2)))
+
+(define* (ccdoubles-cplx-matrix-angle {R  ccdoubles-real-matrix?/alive}
+				      {O1 ccdoubles-cplx-matrix?/alive}
+				      {O2 ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-real-cplx-cplx-matrices-same-dimensions R O1 O2)
+  (ccdoubles_cplx_matrix_angle ($ccdoubles-real-matrix-nrows   R)
+			       ($ccdoubles-real-matrix-ncols   R)
+			       ($ccdoubles-real-matrix-pointer R)
+			       ($ccdoubles-cplx-matrix-pointer O1)
+			       ($ccdoubles-cplx-matrix-pointer O2)))
+
+(define* (ccdoubles-cplx-matrix-from-rect {R  ccdoubles-cplx-matrix?/alive}
+					  {O1 ccdoubles-real-matrix?/alive}
+					  {O2 ccdoubles-real-matrix?/alive})
+  (ccdoubles-cplx-real-real-matrices-same-dimensions R O1 O2)
+  (ccdoubles_cplx_matrix_from_rect ($ccdoubles-cplx-matrix-nrows   R)
+				   ($ccdoubles-cplx-matrix-ncols   R)
+				   ($ccdoubles-cplx-matrix-pointer R)
+				   ($ccdoubles-real-matrix-pointer O1)
+				   ($ccdoubles-real-matrix-pointer O2)))
+
+(define* (ccdoubles-cplx-matrix-from-polar {R  ccdoubles-cplx-matrix?/alive}
+					   {O1 ccdoubles-real-matrix?/alive}
+					   {O2 ccdoubles-real-matrix?/alive})
+  (ccdoubles-cplx-real-real-matrices-same-dimensions R O1 O2)
+  (ccdoubles_cplx_matrix_from_polar ($ccdoubles-cplx-matrix-nrows   R)
+				    ($ccdoubles-cplx-matrix-ncols   R)
+				    ($ccdoubles-cplx-matrix-pointer R)
+				    ($ccdoubles-real-matrix-pointer O1)
+				    ($ccdoubles-real-matrix-pointer O2)))
+
+;;; --------------------------------------------------------------------
+;;; arithmetic
+
+(define-cplx-matrix-op-2 ccdoubles-cplx-matrix-add		ccdoubles_cplx_matrix_add)
+(define-cplx-matrix-op-2 ccdoubles-cplx-matrix-sub		ccdoubles_cplx_matrix_sub)
+(define-cplx-matrix-op-2 ccdoubles-cplx-matrix-mul		ccdoubles_cplx_matrix_mul)
+(define-cplx-matrix-op-2 ccdoubles-cplx-matrix-div		ccdoubles_cplx_matrix_div)
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-neg		ccdoubles_cplx_matrix_neg)
+
+;;; --------------------------------------------------------------------
+;;; special
+
+(define* (ccdoubles-cplx-matrix-scalar-mul {R ccdoubles-cplx-matrix?/alive}
+					   {L complex?}
+					   {O ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-cplx-matrix-same-dimensions-2 R O)
+  (let ((L (inexact L)))
+    (ccdoubles_cplx_matrix_scalar_mul_split ($ccdoubles-cplx-matrix-nrows   R)
+					    ($ccdoubles-cplx-matrix-ncols   R)
+					    ($ccdoubles-cplx-matrix-pointer R)
+					    (real-part L)
+					    (imag-part L)
+					    ($ccdoubles-cplx-matrix-pointer O))))
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-conj			ccdoubles_cplx_matrix_conj)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-transpose		ccdoubles_cplx_matrix_transpose)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-conjugate-transpose	ccdoubles_cplx_matrix_conjugate_transpose)
+
+(define* (ccdoubles-cplx-matrix-rowcol-mul {R  ccdoubles-cplx-matrix?/alive}
+					   {O1 ccdoubles-cplx-matrix?/alive}
+					   {O2 ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-cplx-matrix-product-dimensions R O1 O2)
+  (ccdoubles_cplx_matrix_rowcol_mul ($ccdoubles-cplx-matrix-nrows R)
+				    ($ccdoubles-cplx-matrix-ncols O1)
+				    ($ccdoubles-cplx-matrix-ncols R)
+				    ($ccdoubles-cplx-matrix-pointer R)
+				    ($ccdoubles-cplx-matrix-pointer O1)
+				    ($ccdoubles-cplx-matrix-pointer O1)))
+
+(define* (ccdoubles-cplx-matrix-linear-combination {R ccdoubles-cplx-matrix?/alive}
+						   {A complex?}
+						   {O1 ccdoubles-cplx-matrix?/alive}
+						   {B complex?}
+						   {O2 ccdoubles-cplx-matrix?/alive})
+  (ccdoubles-cplx-matrix-same-dimensions-3 R O1 O2)
+  (let ((A (inexact A))
+	(B (inexact B)))
+    (ccdoubles_cplx_matrix_linear_combination_split ($ccdoubles-cplx-matrix-nrows   R)
+						    ($ccdoubles-cplx-matrix-ncols   R)
+						    ($ccdoubles-cplx-matrix-pointer R)
+						    (real-part A)
+						    (imag-part A)
+						    ($ccdoubles-cplx-matrix-pointer O1)
+						    (real-part B)
+						    (imag-part B)
+						    ($ccdoubles-cplx-matrix-pointer O2))))
+
+;;; --------------------------------------------------------------------
+;;; exponentiation and logarithms
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-exp	ccdoubles_cplx_matrix_exp)
+;;(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-exp10	ccdoubles_cplx_matrix_exp10)
+;;(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-exp2	ccdoubles_cplx_matrix_exp2)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-log	ccdoubles_cplx_matrix_log)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-log10	ccdoubles_cplx_matrix_log10)
+;;(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-log2	ccdoubles_cplx_matrix_log2)
+;;(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-logb	ccdoubles_cplx_matrix_logb)
+
+(define-cplx-matrix-op-2 ccdoubles-cplx-matrix-pow	ccdoubles_cplx_matrix_pow)
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-sqrt	ccdoubles_cplx_matrix_sqrt)
+;; (define-cplx-matrix-op-1 ccdoubles-cplx-matrix-cbrt	ccdoubles_cplx_matrix_cbrt)
+
+;;; --------------------------------------------------------------------
+;;; trigonometric
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-sin	ccdoubles_cplx_matrix_sin)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-cos	ccdoubles_cplx_matrix_cos)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-tan	ccdoubles_cplx_matrix_tan)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-asin	ccdoubles_cplx_matrix_asin)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-acos	ccdoubles_cplx_matrix_acos)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-atan	ccdoubles_cplx_matrix_atan)
+
+;;; --------------------------------------------------------------------
+;;; hyperbolic
+
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-sinh	ccdoubles_cplx_matrix_sinh)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-cosh	ccdoubles_cplx_matrix_cosh)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-tanh	ccdoubles_cplx_matrix_tanh)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-asinh	ccdoubles_cplx_matrix_asinh)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-acosh	ccdoubles_cplx_matrix_acosh)
+(define-cplx-matrix-op-1 ccdoubles-cplx-matrix-atanh	ccdoubles_cplx_matrix_atanh)
 
 
 
