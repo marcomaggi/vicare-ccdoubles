@@ -1261,28 +1261,28 @@ are instances of @objtype{ccdoubles-cplx-vector}.
 
 
 @defun ccdoubles-cplx-vector-exp @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{exp} to @var{O}.
+Store in @var{R} the result of applying @cfunc{cexp} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-log @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{log} to @var{O}.
+Store in @var{R} the result of applying @cfunc{clog} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-log10 @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{log10} to @var{O}.
+Store in @var{R} the result of applying @cfunc{clog10} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-pow @var{R} @vari{O} @varii{O}
-Store in @var{R} the result of applying @cfunc{pow} to @vari{O} and
+Store in @var{R} the result of applying @cfunc{cpow} to @vari{O} and
 @varii{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-sqrt @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{sqrt} to @var{O}.
+Store in @var{R} the result of applying @cfunc{csqrt} to @var{O}.
 @end defun
 
 @c page
@@ -1298,32 +1298,32 @@ instances of @objtype{ccdoubles-cplx-vector}.
 
 
 @defun ccdoubles-cplx-vector-sin @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{sin} to @var{O}.
+Store in @var{R} the result of applying @cfunc{csin} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-cos @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{cos} to @var{O}.
+Store in @var{R} the result of applying @cfunc{ccos} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-tan @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{tan} to @var{O}.
+Store in @var{R} the result of applying @cfunc{ctan} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-asin @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{asin} to @var{O}.
+Store in @var{R} the result of applying @cfunc{casin} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-acos @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{acos} to @var{O}.
+Store in @var{R} the result of applying @cfunc{cacos} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-atan @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{atan} to @var{O}.
+Store in @var{R} the result of applying @cfunc{catan} to @var{O}.
 @end defun
 
 @c page
@@ -1339,32 +1339,32 @@ of @objtype{ccdoubles-cplx-vector}.
 
 
 @defun ccdoubles-cplx-vector-sinh @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{sinh} to @var{O}.
+Store in @var{R} the result of applying @cfunc{csinh} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-cosh @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{cosh} to @var{O}.
+Store in @var{R} the result of applying @cfunc{ccosh} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-tanh @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{tanh} to @var{O}.
+Store in @var{R} the result of applying @cfunc{ctanh} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-asinh @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{asinh} to @var{O}.
+Store in @var{R} the result of applying @cfunc{casinh} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-acosh @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{acosh} to @var{O}.
+Store in @var{R} the result of applying @cfunc{cacosh} to @var{O}.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-atanh @var{R} @var{O}
-Store in @var{R} the result of applying @cfunc{atanh} to @var{O}.
+Store in @var{R} the result of applying @cfunc{catanh} to @var{O}.
 @end defun
 
 @c page
@@ -1837,6 +1837,12 @@ Store in @var{R} the result of transposing @var{O}.
 @end defun
 
 
+@defun ccdoubles-real-matrix-rowcol-mul @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of the row--by--column product between
+@vari{O} and @varii{O}.
+@end defun
+
+
 @defun ccdoubles-real-matrix-linear-combination @var{R} @var{A} @vari{O} @var{B} @varii{O}
 Compute @code{@var{R} = @var{A} * @vari{O} + @var{B} * @varii{O}}, where
 @var{A} and @var{B} are scalar flonum objects.
@@ -2025,6 +2031,12 @@ Store in @var{R} the result of applying @cfunc{atanh} to @var{O}.
 * plain cmat init::             Initialisation and finalisation.
 * plain cmat access::           Setters and getters.
 * plain cmat conversion::       Object types conversion.
+* plain cmat basic::            Basic vector operations.
+* plain cmat arithmetic::       Arithmetic vector operations.
+* plain cmat special::          Special vector operations.
+* plain cmat explog::           Exponentiation and logarithm vector operations.
+* plain cmat trigonometric::    Trigonometric vector operations.
+* plain cmat hyperbolic::       Hyperbolic vector operations.
 @end menu
 
 @c page
@@ -2223,6 +2235,265 @@ Conversion example:
 (define V^     (ccdoubles-cplx-matrix->vector cmat))
 (equal? V V^)   @result{} #t
 @end lisp
+
+@c page
+@node plain cmat basic
+@subsection Basic matrix operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{matrices cplx basic, Basic complex matrix
+operations}.  Unless otherwise specified: all the operands @var{R} and
+@var{O} are instances of @objtype{ccdoubles-cplx-matrix}.
+
+
+@defun ccdoubles-cplx-matrix-clear @var{R}
+Reset all the slots to @samp{0.0}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-set @var{R} @var{flo}
+Set all the slots to the flonum @var{flo}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-copy @var{dst-cmat} @var{src-cmat}
+Copy all the slots from the source matrix @var{src-cmat} to the
+destination matrix @var{dst-cmat}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-real @var{R} @var{O}
+Store in the real matrix @var{R} the real part of the complex matrix
+@var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-imag @var{R} @var{O}
+Store in the real matrix @var{R} the imaginary part of the complex
+matrix @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-magnitude @var{R} @var{O}
+Store in the real matrix @var{R} the magnitude of the complex matrix
+@var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-angle @var{R} @var{O}
+Store in the real matrix @var{R} the angle of the complex matrix
+@var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-conj @var{R} @var{O}
+Store in @var{R} the complex conjugate of @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-from-rect @var{R} @vari{O} @varii{O}
+Fill the complex matrix @var{R} with the real part from the real matrix
+@vari{O} and the imaginary part from the real matrix @varii{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-from-polar @var{R} @vari{O} @varii{O}
+Fill the complex matrix @var{R} with the magnitude from the real matrix
+@vari{O} and the angle from the real matrix @varii{O}.
+@end defun
+
+@c page
+@node plain cmat arithmetic
+@subsection Arithmetic matrix operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{matrices cplx arithmetic, Arithmetic complex
+matrix operations}.  All the operands @var{R} and @var{O} are instances
+of @objtype{ccdoubles-cplx-matrix}.
+
+
+@defun ccdoubles-cplx-matrix-add @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} + @varii{O}}.
+@end defun
+
+@defun ccdoubles-cplx-matrix-sub @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} - @varii{O}}.
+@end defun
+
+@defun ccdoubles-cplx-matrix-mul @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} * @varii{O}}, slot by slot.
+@end defun
+
+@defun ccdoubles-cplx-matrix-div @var{R} @vari{O} @varii{O}
+Perform @code{@var{R} = @vari{O} / @varii{O}}, slot by slot.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-neg @var{R} @var{O}
+Store in @var{R} the negation of @var{O}.
+@end defun
+
+@c page
+@node plain cmat special
+@subsection Special matrix operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{matrices cplx special, Special complex matrix
+operations}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-cplx-matrix}.
+
+
+@defun ccdoubles-cplx-matrix-scalar-mul @var{R} @var{L} @var{O}
+Store in @var{R} the result of multiplying the scalar flonum @var{L} to
+@var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-transpose @var{R} @var{O}
+Store in @var{R} the result of transposing @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-conjugate-transpose @var{R} @var{O}
+Store in @var{R} the result of transposing the conjugate of @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-rowcol-mul @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of the row--by--column product between
+@vari{O} and @varii{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-linear-combination @var{R} @var{A} @vari{O} @var{B} @varii{O}
+Compute @code{@var{R} = @var{A} * @vari{O} + @var{B} * @varii{O}}, where
+@var{A} and @var{B} are scalar flonum objects.
+@end defun
+
+@c page
+@node plain cmat explog
+@subsection Exponentiation and logarithm matrix operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{matrices cplx explog, Complex matrix exponentiation
+and logarithms}.  All the operands @var{R} and @var{O} are instances of
+@objtype{ccdoubles-cplx-matrix}.
+
+
+@defun ccdoubles-cplx-matrix-exp @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{cexp} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-log @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{clog} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-log10 @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{clog10} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-pow @var{R} @vari{O} @varii{O}
+Store in @var{R} the result of applying @cfunc{cpow} to @vari{O} and
+@varii{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-sqrt @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{csqrt} to @var{O}.
+@end defun
+
+@c page
+@node plain cmat trigonometric
+@subsection Trigonometric matrix operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{matrices cplx trigonometric, Trigonometric
+complex matrix operations}.  All the operands @var{R} and @var{O} are
+instances of @objtype{ccdoubles-cplx-matrix}.
+
+
+@defun ccdoubles-cplx-matrix-sin @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{csin} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-cos @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{ccos} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-tan @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{ctan} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-asin @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{casin} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-acos @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{cacos} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-atan @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{catan} to @var{O}.
+@end defun
+
+@c page
+@node plain cmat hyperbolic
+@subsection Hyperbolic matrix operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.  For the original documentation of these
+functions @ccdoublesref{matrices cplx hyperbolic, Hyperbolic complex
+matrix operations}.  All the operands @var{R} and @var{O} are instances
+of @objtype{ccdoubles-cplx-matrix}.
+
+
+@defun ccdoubles-cplx-matrix-sinh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{csinh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-cosh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{ccosh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-tanh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{ctanh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-asinh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{casinh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-acosh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{cacosh} to @var{O}.
+@end defun
+
+
+@defun ccdoubles-cplx-matrix-atanh @var{R} @var{O}
+Store in @var{R} the result of applying @cfunc{catanh} to @var{O}.
+@end defun
 
 @c page
 @node plain ivec
