@@ -513,30 +513,82 @@
   (collect))
 
 
+(parametrise ((check-test-name		'conversion)
+	      (struct-guardian-logger	#f))
+
+;;; real vectors
+
+  (let-syntax ((vec (identifier-syntax '#(1.2 3.4 5.6))))
+    (check
+	(let* ((P (vector->ccdoubles-real-vector vec))
+	       (V (ccdoubles-real-vector->vector P)))
+	  V)
+      => vec))
+
+;;; --------------------------------------------------------------------
+;;; complex vectors
+
+  (let-syntax ((vec (identifier-syntax '#(1.2+2.3i 3.4+4.5i 5.6+6.7i))))
+    (check
+	(let* ((N 3)
+	       (P (vector->ccdoubles-cplx-vector vec))
+	       (V (ccdoubles-cplx-vector->vector P)))
+	  V)
+      => vec))
+
+;;; --------------------------------------------------------------------
+;;; real matrices
+
+  (let-syntax ((vec (identifier-syntax '#(1.1 1.2 1.3 2.1 2.2 2.3))))
+    (check
+	(let* ((nrows 2)
+	       (ncols 3)
+	       (P (vector->ccdoubles-real-matrix nrows ncols vec))
+	       (V (ccdoubles-real-matrix->vector P)))
+	  V)
+      => vec))
+
+;;; --------------------------------------------------------------------
+;;; complex matrices
+
+  (let-syntax ((vec (identifier-syntax '#( ;;
+					  1.1+0.1i 1.2+0.1i 1.3+0.1i
+					  2.1+0.1i 2.2+0.1i 2.3+0.1i))))
+    (check
+	(let* ((nrows 2)
+	       (ncols 3)
+	       (P (vector->ccdoubles-cplx-matrix nrows ncols vec))
+	       (V (ccdoubles-cplx-matrix->vector P)))
+	  V)
+      => vec))
+
+  (collect))
+
+
 (parametrise ((check-test-name	'real-vectors-basic))
 
   (check
       (let* ((N 3)
   	     (V (ccdoubles-real-vector-initialise N)))
-	#;(debug-print (ccdoubles-real-vector->scheme-vector V))
+	#;(debug-print (ccdoubles-real-vector->vector V))
         (ccdoubles-real-vector-clear V)
-	(ccdoubles-real-vector->scheme-vector V))
+	(ccdoubles-real-vector->vector V))
     => '#(0.0 0.0 0.0))
 
   (check
       (let* ((N 3)
   	     (V (ccdoubles-real-vector-initialise N)))
-	#;(debug-print (ccdoubles-real-vector->scheme-vector V))
+	#;(debug-print (ccdoubles-real-vector->vector V))
         (ccdoubles-real-vector-set V 1.2)
-  	(ccdoubles-real-vector->scheme-vector V))
+  	(ccdoubles-real-vector->vector V))
     => '#(1.2 1.2 1.2))
 
   (check
       (let* ((N 3)
-  	     (S (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
+  	     (S (vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
   	     (D (ccdoubles-real-vector-initialise N)))
         (ccdoubles-real-vector-copy D S)
-  	(ccdoubles-real-vector->scheme-vector D))
+  	(ccdoubles-real-vector->vector D))
     => '#(1.2 3.4 5.6))
 
   (collect))
@@ -546,54 +598,54 @@
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
-  	     (O2 (scheme-vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
+  	     (O1 (vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
+  	     (O2 (vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
   	     (R  (guarded-malloc (* N sizeof-double))))
         (ccdoubles-real-vector-add N R O1 O2)
-  	(ccdoubles-real-vector->scheme-vector N R))
+  	(ccdoubles-real-vector->vector N R))
     => (list->vector (map +
 		       '(1.2 3.4 5.6)
 		       '(7.8 8.9 9.0))))
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
-  	     (O2 (scheme-vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
+  	     (O1 (vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
+  	     (O2 (vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
   	     (R  (guarded-malloc (* N sizeof-double))))
         (ccdoubles-real-vector-sub N R O1 O2)
-  	(ccdoubles-real-vector->scheme-vector N R))
+  	(ccdoubles-real-vector->vector N R))
     => (list->vector (map -
 		       '(1.2 3.4 5.6)
 		       '(7.8 8.9 9.0))))
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
-  	     (O2 (scheme-vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
+  	     (O1 (vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
+  	     (O2 (vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
   	     (R  (guarded-malloc (* N sizeof-double))))
         (ccdoubles-real-vector-mul N R O1 O2)
-  	(ccdoubles-real-vector->scheme-vector N R))
+  	(ccdoubles-real-vector->vector N R))
     => (list->vector (map *
 		       '(1.2 3.4 5.6)
 		       '(7.8 8.9 9.0))))
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
-  	     (O2 (scheme-vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
+  	     (O1 (vector->ccdoubles-real-vector '#(1.2 3.4 5.6)))
+  	     (O2 (vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
   	     (R  (guarded-malloc (* N sizeof-double))))
         (ccdoubles-real-vector-div N R O1 O2)
-  	(ccdoubles-real-vector->scheme-vector N R))
+  	(ccdoubles-real-vector->vector N R))
     => (list->vector (map /
 		       '(1.2 3.4 5.6)
 		       '(7.8 8.9 9.0))))
 
   (check
       (let* ((N 3)
-  	     (O (scheme-vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
+  	     (O (vector->ccdoubles-real-vector '#(7.8 8.9 9.0)))
   	     (R (guarded-malloc (* N sizeof-double))))
         (ccdoubles-real-vector-neg N R O)
-  	(ccdoubles-real-vector->scheme-vector N R))
+  	(ccdoubles-real-vector->vector N R))
     => (list->vector (map -
 		       '(7.8 8.9 9.0))))
 
@@ -606,22 +658,22 @@
       (let* ((N 3)
   	     (P (guarded-malloc (* 3 sizeof-double-complex))))
         (ccdoubles-cplx-vector-clear N P)
-  	(ccdoubles-cplx-vector->scheme-vector N P))
+  	(ccdoubles-cplx-vector->vector N P))
     => '#(0.0+0.0i 0.0+0.0i 0.0+0.0i))
 
   (check
       (let* ((N 3)
   	     (P (guarded-malloc (* 3 sizeof-double-complex))))
         (ccdoubles-cplx-vector-set-split N P 1.2 3.4)
-  	(ccdoubles-cplx-vector->scheme-vector N P))
+  	(ccdoubles-cplx-vector->vector N P))
     => '#(1.2+3.4i 1.2+3.4i 1.2+3.4i))
 
   (check
       (let* ((N 3)
-  	     (S (scheme-vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
+  	     (S (vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
   	     (D (guarded-malloc (* 3 sizeof-double-complex))))
         (ccdoubles-cplx-vector-copy N D S)
-  	(ccdoubles-cplx-vector->scheme-vector N D))
+  	(ccdoubles-cplx-vector->vector N D))
     => '#(1.2+2.3i 3.4+4.5i 5.6+6.7i))
 
   (collect))
@@ -631,11 +683,11 @@
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
-  	     (O2 (scheme-vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
+  	     (O1 (vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
+  	     (O2 (vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
   	     (R  (guarded-malloc (* N sizeof-double-complex))))
         (ccdoubles-cplx-vector-add N R O1 O2)
-  	(ccdoubles-cplx-vector->scheme-vector N R))
+  	(ccdoubles-cplx-vector->vector N R))
     (=> flonum-vector=?)
     (list->vector (map +
 		    '(1.2+2.3i 3.4+4.5i 5.6+6.7i)
@@ -643,11 +695,11 @@
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
-  	     (O2 (scheme-vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
+  	     (O1 (vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
+  	     (O2 (vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
   	     (R  (guarded-malloc (* N sizeof-double-complex))))
         (ccdoubles-cplx-vector-sub N R O1 O2)
-  	(ccdoubles-cplx-vector->scheme-vector N R))
+  	(ccdoubles-cplx-vector->vector N R))
     (=> flonum-vector=?)
     (list->vector (map -
 		    '(1.2+2.3i 3.4+4.5i 5.6+6.7i)
@@ -655,11 +707,11 @@
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
-  	     (O2 (scheme-vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
+  	     (O1 (vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
+  	     (O2 (vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
   	     (R  (guarded-malloc (* N sizeof-double-complex))))
         (ccdoubles-cplx-vector-mul N R O1 O2)
-  	(ccdoubles-cplx-vector->scheme-vector N R))
+  	(ccdoubles-cplx-vector->vector N R))
     (=> flonum-vector=?)
     (list->vector (map *
 		    '(1.2+2.3i 3.4+4.5i 5.6+6.7i)
@@ -667,11 +719,11 @@
 
   (check
       (let* ((N 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
-  	     (O2 (scheme-vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
+  	     (O1 (vector->ccdoubles-cplx-vector '#(1.2+2.3i 3.4+4.5i 5.6+6.7i)))
+  	     (O2 (vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
   	     (R  (guarded-malloc (* N sizeof-double-complex))))
         (ccdoubles-cplx-vector-div N R O1 O2)
-  	(ccdoubles-cplx-vector->scheme-vector N R))
+  	(ccdoubles-cplx-vector->vector N R))
     (=> flonum-vector=?)
     (list->vector (map /
 		    '(1.2+2.3i 3.4+4.5i 5.6+6.7i)
@@ -679,10 +731,10 @@
 
   (check
       (let* ((N 3)
-  	     (O (scheme-vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
+  	     (O (vector->ccdoubles-cplx-vector '#(7.8+8.9i 8.9+9.1i 9.0+0.1i)))
   	     (R (guarded-malloc (* N sizeof-double-complex))))
         (ccdoubles-cplx-vector-neg N R O)
-  	(ccdoubles-cplx-vector->scheme-vector N R))
+  	(ccdoubles-cplx-vector->vector N R))
     (=> flonum-vector=?)
     (list->vector (map -
 		    '(7.8+8.9i 8.9+9.1i 9.0+0.1i))))
@@ -695,8 +747,8 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (P (scheme-vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
-	     (V (ccdoubles-real-matrix->scheme-vector nrows ncols P)))
+	     (P (vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
+	     (V (ccdoubles-real-matrix->vector nrows ncols P)))
 	V)
     => '#(1.1 1.2 1.3 2.1 2.2 2.3))
 
@@ -710,7 +762,7 @@
 	     (ncols 3)
   	     (P (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-clear nrows ncols P)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols P))
+  	(ccdoubles-real-matrix->vector nrows ncols P))
     => '#(0.0 0.0 0.0  0.0 0.0 0.0))
 
   (check
@@ -718,16 +770,16 @@
 	     (ncols 3)
   	     (P (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-set nrows ncols P 1.2)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols P))
+  	(ccdoubles-real-matrix->vector nrows ncols P))
     => '#(1.2 1.2 1.2  1.2 1.2 1.2))
 
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (S (scheme-vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
+	     (S (vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
   	     (D (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-copy nrows ncols D S)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols D))
+  	(ccdoubles-real-matrix->vector nrows ncols D))
     => '#(1.1 1.2 1.3 2.1 2.2 2.3))
 
   (collect))
@@ -738,11 +790,11 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (O1 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
-	     (O2 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
+	     (O1 (vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
+	     (O2 (vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-add nrows ncols R O1 O2)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-real-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map +
 		    '(1.1 1.2 1.3 2.1 2.2 2.3)
@@ -751,11 +803,11 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (O1 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
-	     (O2 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
+	     (O1 (vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
+	     (O2 (vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-sub nrows ncols R O1 O2)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-real-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map -
 		    '(1.1 1.2 1.3 2.1 2.2 2.3)
@@ -764,11 +816,11 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (O1 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
-	     (O2 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
+	     (O1 (vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
+	     (O2 (vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-mul nrows ncols R O1 O2)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-real-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map *
 		    '(1.1 1.2 1.3 2.1 2.2 2.3)
@@ -777,11 +829,11 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (O1 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
-	     (O2 (scheme-vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
+	     (O1 (vector->ccdoubles-real-matrix nrows ncols '#(1.1 1.2 1.3 2.1 2.2 2.3)))
+	     (O2 (vector->ccdoubles-real-matrix nrows ncols '#(10.1 10.2 10.3 20.1 20.2 20.3)))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double))))
         (ccdoubles-real-matrix-div nrows ncols R O1 O2)
-  	(ccdoubles-real-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-real-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map /
 		    '(1.1 1.2 1.3 2.1 2.2 2.3)
@@ -801,8 +853,8 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (P (scheme-vector->ccdoubles-cplx-matrix nrows ncols M1))
-	     (V (ccdoubles-cplx-matrix->scheme-vector nrows ncols P)))
+	     (P (vector->ccdoubles-cplx-matrix nrows ncols M1))
+	     (V (ccdoubles-cplx-matrix->vector nrows ncols P)))
 	V)
     => M1)
 
@@ -826,44 +878,44 @@
   (check
       (let* ((nrows 2)
 	     (ncols 3)
-	     (O1 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M1))
-	     (O2 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M2))
+	     (O1 (vector->ccdoubles-cplx-matrix nrows ncols M1))
+	     (O2 (vector->ccdoubles-cplx-matrix nrows ncols M2))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double-complex))))
         (ccdoubles-cplx-matrix-add nrows ncols R O1 O2)
-  	(ccdoubles-cplx-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-cplx-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map + L1 L2)))
 
   (check
       (let* ((nrows 2)
   	     (ncols 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M1))
-  	     (O2 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M2))
+  	     (O1 (vector->ccdoubles-cplx-matrix nrows ncols M1))
+  	     (O2 (vector->ccdoubles-cplx-matrix nrows ncols M2))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double-complex))))
         (ccdoubles-cplx-matrix-sub nrows ncols R O1 O2)
-  	(ccdoubles-cplx-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-cplx-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map - L1 L2)))
 
   (check
       (let* ((nrows 2)
   	     (ncols 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M1))
-  	     (O2 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M2))
+  	     (O1 (vector->ccdoubles-cplx-matrix nrows ncols M1))
+  	     (O2 (vector->ccdoubles-cplx-matrix nrows ncols M2))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double-complex))))
         (ccdoubles-cplx-matrix-mul nrows ncols R O1 O2)
-  	(ccdoubles-cplx-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-cplx-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map * L1 L2)))
 
   (check
       (let* ((nrows 2)
   	     (ncols 3)
-  	     (O1 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M1))
-  	     (O2 (scheme-vector->ccdoubles-cplx-matrix nrows ncols M2))
+  	     (O1 (vector->ccdoubles-cplx-matrix nrows ncols M1))
+  	     (O2 (vector->ccdoubles-cplx-matrix nrows ncols M2))
   	     (R  (guarded-malloc (* nrows ncols sizeof-double-complex))))
         (ccdoubles-cplx-matrix-div nrows ncols R O1 O2)
-  	(ccdoubles-cplx-matrix->scheme-vector nrows ncols R))
+  	(ccdoubles-cplx-matrix->vector nrows ncols R))
     (=> flonum-vector=?)
     (list->vector (map / L1 L2)))
 

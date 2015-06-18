@@ -222,7 +222,7 @@ The library @value{FOREIGN_SCHEME_LIB} implements the high level @api{}
 for @value{FOREIGN_PACKAGE}.  All the indexes are zero--based.
 
 @menu
-* plain version::               @value{PACKAGE} version informations.
+* plain version::               @value{FOREIGN_PACKAGE} version informations.
 * plain rvec::                  Real vectors of flonums.
 * plain cvec::                  Complex vectors of flonums.
 * plain rmat::                  Real matrices of flonums.
@@ -231,7 +231,7 @@ for @value{FOREIGN_PACKAGE}.  All the indexes are zero--based.
 
 @c page
 @node plain version
-@section @value{PACKAGE} version informations
+@section @value{FOREIGN_PACKAGE} version informations
 
 
 The installed C library follows version numbering as established by the
@@ -263,6 +263,7 @@ Return a Scheme string representing the version number.
 * plain rvec struct::           Real vector data type.
 * plain rvec init::             Initialisation and finalisation.
 * plain rvec access::           Setters and getters.
+* plain rvec conversion::       Object types conversion.
 @end menu
 
 @c page
@@ -426,6 +427,35 @@ overwriting the old value.  If an error occurs: raise an exception.
 @end defun
 
 @c page
+@node plain rvec conversion
+@subsection Object types conversion
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector->vector @var{rvec}
+Return a Scheme vector object holding the elements of @var{rvec}.
+@end defun
+
+
+@defun vector->ccdoubles-real-vector @var{vec}
+Return an instance of @objtype{ccdoubles-real-vector} holding the
+elements of the Scheme vector @var{vec}.
+@end defun
+
+
+Conversion example:
+
+@lisp
+(define V    '#(1.2 3.4 5.6))
+(define rvec (vector->ccdoubles-real-vector V))
+(define V^   (ccdoubles-real-vector->vector rvec))
+(equal? V V^)   @result{} #t
+@end lisp
+
+@c page
 @node plain cvec
 @section Complex vectors of flonums
 
@@ -434,6 +464,7 @@ overwriting the old value.  If an error occurs: raise an exception.
 * plain cvec struct::           Complex vector data type.
 * plain cvec init::             Initialisation and finalisation.
 * plain cvec access::           Setters and getters.
+* plain cvec conversion::       Object types conversion.
 @end menu
 
 @c page
@@ -598,6 +629,35 @@ exception.
 @end defun
 
 @c page
+@node plain cvec conversion
+@subsection Object types conversion
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-cplx-vector->vector @var{cvec}
+Return a Scheme vector object holding the elements of @var{cvec}.
+@end defun
+
+
+@defun vector->ccdoubles-cplx-vector @var{vec}
+Return an instance of @objtype{ccdoubles-cplx-vector} holding the
+elements of the Scheme vector @var{vec}.
+@end defun
+
+
+Conversion example:
+
+@lisp
+(define V    '#(1.2+2.3i 3.4+4.5i 5.6+6.7i))
+(define cvec (vector->ccdoubles-cplx-vector V))
+(define V^   (ccdoubles-cplx-vector->vector cvec))
+(equal? V V^)   @result{} #t
+@end lisp
+
+@c page
 @node plain rmat
 @section Real matrices of flonums
 
@@ -606,6 +666,7 @@ exception.
 * plain rmat struct::           Real matrix data type.
 * plain rmat init::             Initialisation and finalisation.
 * plain rmat access::           Setters and getters.
+* plain rmat conversion::       Object types conversion.
 @end menu
 
 @c page
@@ -772,6 +833,40 @@ raise an exception.
 @end defun
 
 @c page
+@node plain rmat conversion
+@subsection Object types conversion
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-matrix->vector @var{rmat}
+Return a Scheme vector object holding the elements of @var{rmat}, row
+after row.
+@end defun
+
+
+@defun vector->ccdoubles-real-vector @var{nrows} @var{ncols} @var{vec}
+Return an instance of @objtype{ccdoubles-real-vector}, with @var{nrows}
+rows and @var{ncols} columns, holding the elements of the Scheme vector
+@var{vec}.
+@end defun
+
+
+Conversion example:
+
+@lisp
+(define V      '#(1.1 1.2 1.3
+                  2.1 2.2 2.3))
+(define nrows  2)
+(define ncols  3)
+(define rmat   (vector->ccdoubles-real-matrix nrows ncols V))
+(define V^     (ccdoubles-real-matrix->vector rmat))
+(equal? V V^)   @result{} #t
+@end lisp
+
+@c page
 @node plain cmat
 @section Complex matrices of flonums
 
@@ -780,6 +875,7 @@ raise an exception.
 * plain cmat struct::           Complex matrix data type.
 * plain cmat init::             Initialisation and finalisation.
 * plain cmat access::           Setters and getters.
+* plain cmat conversion::       Object types conversion.
 @end menu
 
 @c page
@@ -944,6 +1040,40 @@ Store the flonum object @var{flo} in the slot at row index @var{row} and
 column index @var{col}, overwriting the old value.  If an error occurs:
 raise an exception.
 @end defun
+
+@c page
+@node plain cmat conversion
+@subsection Object types conversion
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-cplx-matrix->vector @var{cmat}
+Return a Scheme vector object holding the elements of @var{cmat}, row
+after row.
+@end defun
+
+
+@defun vector->ccdoubles-cplx-vector @var{nrows} @var{ncols} @var{vec}
+Return an instance of @objtype{ccdoubles-cplx-vector}, with @var{nrows}
+rows and @var{ncols} columns, holding the elements of the Scheme vector
+@var{vec}.
+@end defun
+
+
+Conversion example:
+
+@lisp
+(define V      '#(1.1+0.1i 1.2+0.1i 1.3+0.1i
+                  2.1+0.1i 2.2+0.1i 2.3+0.1i))
+(define nrows  2)
+(define ncols  3)
+(define cmat   (vector->ccdoubles-cplx-matrix nrows ncols V))
+(define V^     (ccdoubles-cplx-matrix->vector cmat))
+(equal? V V^)   @result{} #t
+@end lisp
 
 @c page
 @c ------------------------------------------------------------

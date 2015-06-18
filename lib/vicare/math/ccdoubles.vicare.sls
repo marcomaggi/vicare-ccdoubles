@@ -71,7 +71,10 @@
     ccdoubles-cplx-matrix-ref			ccdoubles-cplx-matrix-set!
 
     ;; conversion
-    ccdoubles-real-vector->scheme-vector	scheme-vector->ccdoubles-real-vector
+    ccdoubles-real-vector->vector		vector->ccdoubles-real-vector
+    ccdoubles-cplx-vector->vector		vector->ccdoubles-cplx-vector
+    ccdoubles-real-matrix->vector		vector->ccdoubles-real-matrix
+    ccdoubles-cplx-matrix->vector		vector->ccdoubles-cplx-matrix
 
     ;; real vectors
     ccdoubles-real-vector-clear
@@ -614,66 +617,98 @@
 
 (define* (ccdoubles-real-vector-ref {rvec ccdoubles-real-vector?/alive} {idx ccdoubles-real-vector-index?})
   (ccdoubles-real-vector-and-index rvec idx)
+  ($ccdoubles-real-vector-ref rvec idx))
+
+(define ($ccdoubles-real-vector-ref rvec idx)
   (array-ref-c-double ($ccdoubles-real-vector-pointer rvec) idx))
+
+;;;
 
 (define* (ccdoubles-real-vector-set! {rvec ccdoubles-real-vector?/alive} {idx ccdoubles-real-vector-index?} {val flonum?})
   (ccdoubles-real-vector-and-index rvec idx)
+  ($ccdoubles-real-vector-set! rvec idx val))
+
+(define ($ccdoubles-real-vector-set! rvec idx val)
   (array-set-c-double! ($ccdoubles-real-vector-pointer rvec) idx val))
 
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-cplx-vector-ref {rvec ccdoubles-cplx-vector?/alive} {idx ccdoubles-cplx-vector-index?})
   (ccdoubles-cplx-vector-and-index rvec idx)
+  ($ccdoubles-cplx-vector-ref rvec idx))
+
+(define ($ccdoubles-cplx-vector-ref rvec idx)
   (%array-ref-c-double-complex ($ccdoubles-cplx-vector-pointer rvec) idx))
+
+;;;
 
 (define* (ccdoubles-cplx-vector-set! {rvec ccdoubles-cplx-vector?/alive} {idx ccdoubles-cplx-vector-index?} {val complex?})
   (ccdoubles-cplx-vector-and-index rvec idx)
+  ($ccdoubles-cplx-vector-set! rvec idx val))
+
+(define ($ccdoubles-cplx-vector-set! rvec idx val)
   (%array-set-c-double-complex! ($ccdoubles-cplx-vector-pointer rvec) idx val))
 
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-real-matrix-ref {rmat ccdoubles-real-matrix?/alive}
-				    {rowidx ccdoubles-real-matrix-row-index?}
-				    {colidx ccdoubles-real-matrix-col-index?})
-  (ccdoubles-real-matrix-and-row-index rmat rowidx)
-  (ccdoubles-real-matrix-and-col-index rmat colidx)
+				    {row ccdoubles-real-matrix-row-index?}
+				    {col ccdoubles-real-matrix-col-index?})
+  (ccdoubles-real-matrix-and-row-index rmat row)
+  (ccdoubles-real-matrix-and-col-index rmat col)
+  ($ccdoubles-real-matrix-ref rmat row col))
+
+(define ($ccdoubles-real-matrix-ref rmat row col)
   (array-ref-c-double ($ccdoubles-real-matrix-pointer rmat)
-		      (+ colidx (* rowidx ($ccdoubles-real-matrix-ncols rmat)))))
+		      (+ col (* row ($ccdoubles-real-matrix-ncols rmat)))))
+
+;;;
 
 (define* (ccdoubles-real-matrix-set! {rmat ccdoubles-real-matrix?/alive}
-				     {rowidx ccdoubles-real-matrix-row-index?}
-				     {colidx ccdoubles-real-matrix-col-index?}
+				     {row ccdoubles-real-matrix-row-index?}
+				     {col ccdoubles-real-matrix-col-index?}
 				     {val flonum?})
-  (ccdoubles-real-matrix-and-row-index rmat rowidx)
-  (ccdoubles-real-matrix-and-col-index rmat colidx)
+  (ccdoubles-real-matrix-and-row-index rmat row)
+  (ccdoubles-real-matrix-and-col-index rmat col)
+  ($ccdoubles-real-matrix-set! rmat row col val))
+
+(define ($ccdoubles-real-matrix-set! rmat row col val)
   (array-set-c-double! ($ccdoubles-real-matrix-pointer rmat)
-		       (+ colidx (* rowidx ($ccdoubles-real-matrix-ncols rmat)))
+		       (+ col (* row ($ccdoubles-real-matrix-ncols rmat)))
 		       val))
 
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-cplx-matrix-ref {rmat ccdoubles-cplx-matrix?/alive}
-				    {rowidx ccdoubles-cplx-matrix-row-index?}
-				    {colidx ccdoubles-cplx-matrix-col-index?})
-  (ccdoubles-cplx-matrix-and-row-index rmat rowidx)
-  (ccdoubles-cplx-matrix-and-col-index rmat colidx)
+				    {row ccdoubles-cplx-matrix-row-index?}
+				    {col ccdoubles-cplx-matrix-col-index?})
+  (ccdoubles-cplx-matrix-and-row-index rmat row)
+  (ccdoubles-cplx-matrix-and-col-index rmat col)
+  ($ccdoubles-cplx-matrix-ref rmat row col))
+
+(define ($ccdoubles-cplx-matrix-ref rmat row col)
   (%array-ref-c-double-complex ($ccdoubles-cplx-matrix-pointer rmat)
-			       (+ colidx (* rowidx ($ccdoubles-cplx-matrix-ncols rmat)))))
+			       (+ col (* row ($ccdoubles-cplx-matrix-ncols rmat)))))
+
+;;;
 
 (define* (ccdoubles-cplx-matrix-set! {rmat ccdoubles-cplx-matrix?/alive}
-				     {rowidx ccdoubles-cplx-matrix-row-index?}
-				     {colidx ccdoubles-cplx-matrix-col-index?}
+				     {row ccdoubles-cplx-matrix-row-index?}
+				     {col ccdoubles-cplx-matrix-col-index?}
 				     {val complex?})
-  (ccdoubles-cplx-matrix-and-row-index rmat rowidx)
-  (ccdoubles-cplx-matrix-and-col-index rmat colidx)
+  (ccdoubles-cplx-matrix-and-row-index rmat row)
+  (ccdoubles-cplx-matrix-and-col-index rmat col)
+  ($ccdoubles-cplx-matrix-set! rmat row col val))
+
+(define ($ccdoubles-cplx-matrix-set! rmat row col val)
   (%array-set-c-double-complex! ($ccdoubles-cplx-matrix-pointer rmat)
-				(+ colidx (* rowidx ($ccdoubles-cplx-matrix-ncols rmat)))
+				(+ col (* row ($ccdoubles-cplx-matrix-ncols rmat)))
 				val))
 
 
 ;;;; conversion
 
-(define* (ccdoubles-real-vector->scheme-vector {rvec ccdoubles-real-vector?/alive})
+(define* (ccdoubles-real-vector->vector {rvec ccdoubles-real-vector?/alive})
   (let* ((ptr    ($ccdoubles-real-vector-pointer rvec))
 	 (nslots ($ccdoubles-real-vector-nslots  rvec)))
     (do ((vec (make-vector nslots))
@@ -683,20 +718,20 @@
 	 vec)
       ($vector-set! vec i (pointer-ref-c-double ptr j)))))
 
-(define* (scheme-vector->ccdoubles-real-vector {V vector?})
-  (define nslots (vector-length V))
-  (receive-and-return (rvec)
-      (ccdoubles-real-vector-initialise nslots)
+(define* (vector->ccdoubles-real-vector {V vector?})
+  (let* ((nslots (vector-length V))
+	 (rvec   (ccdoubles-real-vector-initialise nslots)))
     (do ((ptr ($ccdoubles-real-vector-pointer rvec))
 	 (i 0 (fxadd1 i)))
-	((fx=? i nslots))
+	((fx=? i nslots)
+	 rvec)
       (array-set-c-double! ptr i (vector-ref V i)))))
 
 ;;; --------------------------------------------------------------------
 
-(define* (ccdoubles-cplx-vector->vector {rvec ccdoubles-cplx-vector?/alive})
-  (let* ((ptr    ($ccdoubles-cplx-vector-pointer rvec))
-	 (nslots ($ccdoubles-cplx-vector-nslots  rvec)))
+(define* (ccdoubles-cplx-vector->vector {cvec ccdoubles-cplx-vector?/alive})
+  (let* ((ptr    ($ccdoubles-cplx-vector-pointer cvec))
+	 (nslots ($ccdoubles-cplx-vector-nslots  cvec)))
     (do ((vec (make-vector nslots))
 	 (i 0 ($fxadd1 i))
 	 (j 0 (fx+ j SIZEOF-DOUBLE-COMPLEX)))
@@ -704,33 +739,66 @@
 	 vec)
       ($vector-set! vec i (%pointer-ref-c-double-complex ptr j)))))
 
-;;; --------------------------------------------------------------------
-
-(define* (ccdoubles-real-matrix->matrix {rvec ccdoubles-real-vector?/alive})
-  (let* ((ptr    ($ccdoubles-real-matrix-pointer rvec))
-	 (nrows  ($ccdoubles-real-matrix-nrows   rvec))
-	 (ncols  ($ccdoubles-real-matrix-nrows   rvec))
-	 (nslots (* nrows ncols)))
-    (do ((vec (make-vector nslots))
-	 (i 0 ($fxadd1 i))
-	 (j 0 (fx+ j SIZEOF-DOUBLE)))
-	((>= i nslots)
-	 vec)
-      ($vector-set! vec i (pointer-ref-c-double ptr j)))))
+(define* (vector->ccdoubles-cplx-vector {V vector?})
+  (define nslots (vector-length V))
+  (receive-and-return (cvec)
+      (ccdoubles-cplx-vector-initialise nslots)
+    (do ((ptr ($ccdoubles-cplx-vector-pointer cvec))
+	 (i 0 (fxadd1 i)))
+	((fx=? i nslots))
+      (%array-set-c-double-complex! ptr i (vector-ref V i)))))
 
 ;;; --------------------------------------------------------------------
 
-(define* (ccdoubles-cplx-matrix->matrix {rvec ccdoubles-cplx-vector?/alive})
-  (let* ((ptr    ($ccdoubles-cplx-matrix-pointer rvec))
-	 (nrows  ($ccdoubles-cplx-matrix-nrows   rvec))
-	 (ncols  ($ccdoubles-cplx-matrix-nrows   rvec))
-	 (nslots (* nrows ncols)))
-    (do ((vec (make-vector nslots))
-	 (i 0 ($fxadd1 i))
-	 (j 0 (fx+ j SIZEOF-DOUBLE-COMPLEX)))
-	((>= i nslots)
-	 vec)
-      ($vector-set! vec i (%pointer-ref-c-double-complex ptr j)))))
+(define* (ccdoubles-real-matrix->vector {rmat ccdoubles-real-matrix?/alive})
+  (let* ((nrows  ($ccdoubles-real-matrix-nrows rmat))
+	 (ncols  ($ccdoubles-real-matrix-ncols rmat)))
+    (let* ((nslots (* nrows ncols))
+	   (vec    (make-vector nslots)))
+      (do ((i 0 (fxadd1 i)))
+	  ((fx=? i nslots)
+	   vec)
+	(vector-set! vec i ($ccdoubles-real-vector-ref rmat i))))))
+
+(define* (vector->ccdoubles-real-matrix {nrows ccdoubles-real-matrix-row-index?}
+					{ncols ccdoubles-real-matrix-col-index?}
+					{vec   vector?})
+  (let ((nslots (fx* nrows ncols)))
+    (unless (fx=? nslots (vector-length vec))
+      (procedure-arguments-consistency-violation __who__
+	"incompatible vector length and requested matrix dimensions"
+	vec nrows ncols))
+    (do ((rmat (ccdoubles-real-matrix-initialise nrows ncols))
+	 (i 0 (fxadd1 i)))
+	((fx=? i nslots)
+	 rmat)
+      ($ccdoubles-real-vector-set! rmat i (vector-ref vec i)))))
+
+;;; --------------------------------------------------------------------
+
+(define* (ccdoubles-cplx-matrix->vector {cmat ccdoubles-cplx-matrix?/alive})
+  (let* ((nrows  ($ccdoubles-cplx-matrix-nrows cmat))
+	 (ncols  ($ccdoubles-cplx-matrix-ncols cmat)))
+    (let* ((nslots (* nrows ncols))
+	   (vec    (make-vector nslots)))
+      (do ((i 0 (fxadd1 i)))
+	  ((fx=? i nslots)
+	   vec)
+	(vector-set! vec i ($ccdoubles-cplx-vector-ref cmat i))))))
+
+(define* (vector->ccdoubles-cplx-matrix {nrows ccdoubles-cplx-matrix-row-index?}
+					{ncols ccdoubles-cplx-matrix-col-index?}
+					{vec   vector?})
+  (let ((nslots (fx* nrows ncols)))
+    (unless (fx=? nslots (vector-length vec))
+      (procedure-arguments-consistency-violation __who__
+	"incompatible vector length and requested matrix dimensions"
+	vec nrows ncols))
+    (do ((cmat (ccdoubles-cplx-matrix-initialise nrows ncols))
+	 (i 0 (fxadd1 i)))
+	((fx=? i nslots)
+	 cmat)
+      ($ccdoubles-cplx-vector-set! cmat i (vector-ref vec i)))))
 
 
 ;;;; high-level API: real vectors
