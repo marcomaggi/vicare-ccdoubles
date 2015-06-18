@@ -575,6 +575,8 @@
 	(ccdoubles-real-vector->vector V))
     => '#(0.0 0.0 0.0))
 
+;;; --------------------------------------------------------------------
+
   (check
       (let* ((N 3)
   	     (V (ccdoubles-real-vector-initialise N)))
@@ -582,6 +584,8 @@
         (ccdoubles-real-vector-set V 1.2)
   	(ccdoubles-real-vector->vector V))
     => '#(1.2 1.2 1.2))
+
+;;; --------------------------------------------------------------------
 
   (check
       (let* ((N 3)

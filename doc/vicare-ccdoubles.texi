@@ -264,6 +264,7 @@ Return a Scheme string representing the version number.
 * plain rvec init::             Initialisation and finalisation.
 * plain rvec access::           Setters and getters.
 * plain rvec conversion::       Object types conversion.
+* plain rvec basic::            Basic vector operations.
 @end menu
 
 @c page
@@ -454,6 +455,30 @@ Conversion example:
 (define V^   (ccdoubles-real-vector->vector rvec))
 (equal? V V^)   @result{} #t
 @end lisp
+
+@c page
+@node plain rvec basic
+@subsection Basic vector operations
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-real-vector-clear @var{rvec}
+Reset all the slots to @samp{0.0}.
+@end defun
+
+
+@defun ccdoubles-real-vector-set @var{rvec} @var{flo}
+Set all the slots to the flonum @var{flo}.
+@end defun
+
+
+@defun ccdoubles-real-vector-copy @var{dst-rvec} @var{src-rvec}
+Copy all the slots from the source vector @var{src-rvec} to the
+destination vector @var{dst-rvec}.
+@end defun
 
 @c page
 @node plain cvec

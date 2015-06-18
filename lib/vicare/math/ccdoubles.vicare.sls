@@ -819,6 +819,8 @@
 			      ($ccdoubles-real-vector-pointer dst)
 			      ($ccdoubles-real-vector-pointer src)))
 
+;;; --------------------------------------------------------------------
+
 (define* ccdoubles-real-vector-add			ccdoubles_real_vector_add)
 
 (define* ccdoubles-real-vector-sub			ccdoubles_real_vector_sub)
