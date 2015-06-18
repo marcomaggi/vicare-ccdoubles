@@ -227,6 +227,8 @@ for @value{FOREIGN_PACKAGE}.  All the indexes are zero--based.
 * plain cvec::                  Complex vectors of flonums.
 * plain rmat::                  Real matrices of flonums.
 * plain cmat::                  Complex matrices of flonums.
+* plain ivec::                  Real vectors of integers.
+* plain imat::                  Real matrices of integers.
 @end menu
 
 @c page
@@ -1097,6 +1099,424 @@ Conversion example:
 (define ncols  3)
 (define cmat   (vector->ccdoubles-cplx-matrix nrows ncols V))
 (define V^     (ccdoubles-cplx-matrix->vector cmat))
+(equal? V V^)   @result{} #t
+@end lisp
+
+@c page
+@node plain ivec
+@section Real vectors of integers
+
+
+Vectors of exact integers are used to represent the result of comparison
+operations between vectors of real flonums: less than, greater than,
+etc.
+
+@menu
+* plain ivec struct::           Integers vector data type.
+* plain ivec init::             Initialisation and finalisation.
+* plain ivec access::           Setters and getters.
+* plain ivec conversion::       Object types conversion.
+@end menu
+
+@c page
+@node plain ivec struct
+@subsection Real vector data type
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@deftp {Struct Type} ccdoubles-int-vector
+@cindex Argument @var{ivec}
+@cindex @var{ivec} argument
+Opaque structure type referencing a data area holding @samp{signed int}
+values.  Unless otherwise specified, when instances of this type are
+used as arguments to functions: this documentation identifies them as
+@var{ivec}.
+
+Instances of this type must be finalised with
+@func{ccdoubles-int-vector-finalise}; whenever an instance of this type
+is garbage collected: @func{ccdoubles-int-vector-finalise} is
+automatically applied to it and any error ignored.
+
+In certain contexts, instances of this type own the underlying data
+area, in other contexts they do not:
+
+@itemize
+@item
+Finalising a @objtype{ccdoubles-int-vector} instance owning the data
+area, causes finalisation of the data area too.
+
+@item
+Finalising a @objtype{ccdoubles-int-vector} instance @strong{not}
+owning the data area, leaves the data area untouched.
+@end itemize
+
+@noindent
+this should happen transparently.
+@end deftp
+
+
+@defun ccdoubles-int-vector? @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-int-vector}; otherwise return @false{}.
+@end defun
+
+
+@defun ccdoubles-int-vector?/alive @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-int-vector} and it has not been finalised; return
+@false{} otherwise.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Object properties
+
+
+@defun ccdoubles-int-vector-putprop @var{ivec} @var{key} @var{value}
+Add a new property @var{key} to the property list of @var{ivec};
+@var{key} must be a symbol.  If @var{key} is already set: the old entry
+is mutated to reference the new @var{value}.
+@end defun
+
+
+@defun ccdoubles-int-vector-getprop @var{ivec} @var{key}
+Return the value of the property @var{key} in the property list of
+@var{ivec}; if @var{key} is not set: return @false{}.  @var{key} must
+be a symbol.
+@end defun
+
+
+@defun ccdoubles-int-vector-remprop @var{ivec} @var{key}
+Remove the property @var{key} from the property list of @var{ivec}; if
+@var{key} is not set: nothing happens.  @var{key} must be a symbol.
+@end defun
+
+
+@defun ccdoubles-int-vector-property-list @var{ivec}
+Return a new association list representing the property list of
+@var{ivec}.  The order of the entries is the same as the property
+creation order.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Custom destructor
+
+
+@defun alpha-custom-destructor @var{ivec}
+@defunx set-alpha-custom-destructor! @var{ivec} @var{func}
+Retrieve or set a destructor function associated to @var{ivec}.
+
+Whenever @var{ivec} is finalised, either explicitly with
+@func{ccdoubles-int-vector-finalise} or implicitly by the garbage
+collector, @var{func} is applied to @var{ivec} before the internal state
+of @var{ivec} is destroyed.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Other operations
+
+
+@defun ccdoubles-int-vector-hash @var{ivec}
+Return an exact integer to be used as hashtable key for @var{ivec}.
+Hashtables having a @objtype{ccdoubles-int-vector} as key can be instantiated
+as follows:
+
+@example
+(make-hashtable ccdoubles-int-vector-hash eq?)
+@end example
+@end defun
+
+@c page
+@node plain ivec init
+@subsection Initialisation and finalisation
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-int-vector-initialise @var{nslots}
+Build and return a new @objtype{ccdoubles-int-vector} object; if an
+error occurs raise an exception.  @var{nslots} must be a non--negative
+fixnum representing the number of slots.
+@end defun
+
+
+@defun ccdoubles-int-vector-finalise @var{ivec}
+Finalise @var{ivec}; return unspecified values.  It is fine to apply
+this function multiple times to the same @var{ivec} value: the first
+time the underlying data is finalised, the subsequent times nothing
+happens.
+
+If this function is applied to an @var{ivec} value not owning the
+underlying data area: @var{ivec} is finalised, but the data area is left
+alone.
+@end defun
+
+@c page
+@node plain ivec access
+@subsection Setters and getters
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-int-vector-ref @var{ivec} @var{idx}
+Return a flonum object representing the value in the slot at index
+@var{idx}.  If an error occurs: raise an exception.
+@end defun
+
+
+@defun ccdoubles-int-vector-set! @var{ivec} @var{idx} @var{flo}
+Store the flonum object @var{flo} in the slot at index @var{idx},
+overwriting the old value.  If an error occurs: raise an exception.
+@end defun
+
+@c page
+@node plain ivec conversion
+@subsection Object types conversion
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-int-vector->vector @var{ivec}
+Return a Scheme vector object holding the elements of @var{ivec}.
+@end defun
+
+
+@defun vector->ccdoubles-int-vector @var{vec}
+Return an instance of @objtype{ccdoubles-int-vector} holding the
+elements of the Scheme vector @var{vec}.
+@end defun
+
+
+Conversion example:
+
+@lisp
+(define V     '#(1 2 3))
+(define ivec  (vector->ccdoubles-int-vector V))
+(define V^    (ccdoubles-int-vector->vector ivec))
+(equal? V V^)   @result{} #t
+@end lisp
+
+@c page
+@node plain imat
+@section Real matrices of integers
+
+
+Matrices of exact integers are used to represent the result of
+comparison operations between matrices of real flonums: less than,
+greater than, etc.
+
+@menu
+* plain imat struct::           Real matrix data type.
+* plain imat init::             Initialisation and finalisation.
+* plain imat access::           Setters and getters.
+* plain imat conversion::       Object types conversion.
+@end menu
+
+@c page
+@node plain imat struct
+@subsection Real matrix data type
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@deftp {Struct Type} ccdoubles-int-matrix
+@cindex Argument @var{imat}
+@cindex @var{imat} argument
+Opaque structure type referencing a data area holding @samp{signed int}
+values; every instance of this type represents a matrix in row--major
+order.  Unless otherwise specified, when instances of this type are used
+as arguments to functions: this documentation identifies them as
+@var{imat}.
+
+Instances of this type must be finalised with
+@func{ccdoubles-int-matrix-finalise}; whenever an instance of this type
+is garbage collected: @func{ccdoubles-int-matrix-finalise} is
+automatically applied to it and any error ignored.
+
+In certain contexts, instances of this type own the underlying data
+area, in other contexts they do not:
+
+@itemize
+@item
+Finalising a @objtype{ccdoubles-int-matrix} instance owning the data
+area, causes finalisation of the data area too.
+
+@item
+Finalising a @objtype{ccdoubles-int-matrix} instance @strong{not}
+owning the data area, leaves the data area untouched.
+@end itemize
+
+@noindent
+this should happen transparently.
+@end deftp
+
+
+@defun ccdoubles-int-matrix? @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-int-matrix}; otherwise return @false{}.
+@end defun
+
+
+@defun ccdoubles-int-matrix?/alive @var{obj}
+Return @true{} if @var{obj} is an instance of
+@objtype{ccdoubles-int-matrix} and it has not been finalised; return
+@false{} otherwise.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Object properties
+
+
+@defun ccdoubles-int-matrix-putprop @var{imat} @var{key} @var{value}
+Add a new property @var{key} to the property list of @var{imat};
+@var{key} must be a symbol.  If @var{key} is already set: the old entry
+is mutated to reference the new @var{value}.
+@end defun
+
+
+@defun ccdoubles-int-matrix-getprop @var{imat} @var{key}
+Return the value of the property @var{key} in the property list of
+@var{imat}; if @var{key} is not set: return @false{}.  @var{key} must
+be a symbol.
+@end defun
+
+
+@defun ccdoubles-int-matrix-remprop @var{imat} @var{key}
+Remove the property @var{key} from the property list of @var{imat}; if
+@var{key} is not set: nothing happens.  @var{key} must be a symbol.
+@end defun
+
+
+@defun ccdoubles-int-matrix-property-list @var{imat}
+Return a new association list representing the property list of
+@var{imat}.  The order of the entries is the same as the property
+creation order.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Custom destructor
+
+
+@defun alpha-custom-destructor @var{imat}
+@defunx set-alpha-custom-destructor! @var{imat} @var{func}
+Retrieve or set a destructor function associated to @var{imat}.
+
+Whenever @var{imat} is finalised, either explicitly with
+@func{ccdoubles-int-matrix-finalise} or implicitly by the garbage
+collector, @var{func} is applied to @var{imat} before the internal state
+of @var{imat} is destroyed.
+@end defun
+
+@c ------------------------------------------------------------
+
+@subsubheading Other operations
+
+
+@defun ccdoubles-int-matrix-hash @var{imat}
+Return an exact integer to be used as hashtable key for @var{imat}.
+Hashtables having a @objtype{ccdoubles-int-matrix} as key can be instantiated
+as follows:
+
+@example
+(make-hashtable ccdoubles-int-matrix-hash eq?)
+@end example
+@end defun
+
+@c page
+@node plain imat init
+@subsection Initialisation and finalisation
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-int-matrix-initialise @var{nrows} @var{ncols}
+Build and return a new @objtype{ccdoubles-int-matrix} object; if an
+error occurs raise an exception.  @var{nrows} and @var{ncols} must be a
+non--negative fixnums representing the number of rows and columns.
+@end defun
+
+
+@defun ccdoubles-int-matrix-finalise @var{imat}
+Finalise @var{imat}; return unspecified values.  It is fine to apply
+this function multiple times to the same @var{imat} value: the first
+time the underlying data is finalised, the subsequent times nothing
+happens.
+
+If this function is applied to an @var{imat} value not owning the
+underlying data area: @var{imat} is finalised, but the data area is left
+alone.
+@end defun
+
+@c page
+@node plain imat access
+@subsection Setters and getters
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-int-vector-ref @var{imat} @var{row} @var{col}
+Return a flonum object representing the value in the slot at row index
+@var{row} and column index @var{col}.  If an error occurs: raise an
+exception.
+@end defun
+
+
+@defun ccdoubles-int-vector-set! @var{imat} @var{row} @var{col} @var{flo}
+Store the flonum object @var{flo} in the slot at row index @var{row} and
+column index @var{col}, overwriting the old value.  If an error occurs:
+raise an exception.
+@end defun
+
+@c page
+@node plain imat conversion
+@subsection Object types conversion
+
+
+The following bindings are exported by the library
+@value{FOREIGN_SCHEME_LIB}.
+
+
+@defun ccdoubles-int-matrix->vector @var{imat}
+Return a Scheme vector object holding the elements of @var{imat}, row
+after row.
+@end defun
+
+
+@defun vector->ccdoubles-int-vector @var{nrows} @var{ncols} @var{vec}
+Return an instance of @objtype{ccdoubles-int-vector}, with @var{nrows}
+rows and @var{ncols} columns, holding the elements of the Scheme vector
+@var{vec}.
+@end defun
+
+
+Conversion example:
+
+@lisp
+(define V      '#(1 2 3
+                  4 5 6))
+(define nrows  2)
+(define ncols  3)
+(define imat   (vector->ccdoubles-int-matrix nrows ncols V))
+(define V^     (ccdoubles-int-matrix->vector imat))
 (equal? V V^)   @result{} #t
 @end lisp
 

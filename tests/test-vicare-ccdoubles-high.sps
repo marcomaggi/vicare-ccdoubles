@@ -437,8 +437,200 @@
   (collect 'fullest))
 
 
+(parametrise ((check-test-name		'int-vector-struct)
+	      (struct-guardian-logger	#t))
+
+  (define who 'test)
+
+  (check	;this will be garbage collected
+      (let ((rvec (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector? rvec))
+    => #t)
+
+  (check
+      (ccdoubles-int-vector?/alive (ccdoubles-int-vector-initialise 3))
+    => #t)
+
+  (check	;single finalisation
+      (let ((rvec (ccdoubles-int-vector-initialise 3)))
+  	(ccdoubles-int-vector-finalise rvec))
+    => (void))
+
+  (check	;double finalisation
+      (let ((rvec (ccdoubles-int-vector-initialise 3)))
+  	(ccdoubles-int-vector-finalise rvec)
+  	(ccdoubles-int-vector-finalise rvec))
+    => (void))
+
+  (check	;alive predicate after finalisation
+      (let ((rvec (ccdoubles-int-vector-initialise 3)))
+  	(ccdoubles-int-vector-finalise rvec)
+  	(ccdoubles-int-vector?/alive rvec))
+    => #f)
+
+;;; --------------------------------------------------------------------
+;;; destructor
+
+  (check
+      (with-result
+	(let ((rvec (ccdoubles-int-vector-initialise 3)))
+	  (set-ccdoubles-int-vector-custom-destructor! rvec (lambda (rvec)
+							      (add-result 123)))
+	  (ccdoubles-int-vector-finalise rvec)))
+    => '(#!void (123)))
+
+;;; --------------------------------------------------------------------
+;;; hash
+
+  (check-for-true
+   (integer? (ccdoubles-int-vector-hash (ccdoubles-int-vector-initialise 3))))
+
+  (check
+      (let ((A (ccdoubles-int-vector-initialise 3))
+	    (B (ccdoubles-int-vector-initialise 3))
+	    (T (make-hashtable ccdoubles-int-vector-hash eq?)))
+	(hashtable-set! T A 1)
+	(hashtable-set! T B 2)
+	(list (hashtable-ref T A #f)
+	      (hashtable-ref T B #f)))
+    => '(1 2))
+
+;;; --------------------------------------------------------------------
+;;; properties
+
+  (check
+      (let ((S (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector-property-list S))
+    => '())
+
+  (check
+      (let ((S (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector-putprop S 'ciao 'salut)
+	(ccdoubles-int-vector-getprop S 'ciao))
+    => 'salut)
+
+  (check
+      (let ((S (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector-putprop S 'ciao 'salut)
+	(ccdoubles-int-vector-remprop S 'ciao)
+	(ccdoubles-int-vector-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector-putprop S 'ciao 'salut)
+	(ccdoubles-int-vector-putprop S 'hello 'ohayo)
+	(list (ccdoubles-int-vector-getprop S 'ciao)
+	      (ccdoubles-int-vector-getprop S 'hello)))
+    => '(salut ohayo))
+
+  (collect 'fullest))
+
+
+(parametrise ((check-test-name		'int-matrix-struct)
+	      (struct-guardian-logger	#t))
+
+  (define who 'test)
+
+  (check	;this will be garbage collected
+      (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
+	(ccdoubles-int-matrix? rmat))
+    => #t)
+
+  (check
+      (ccdoubles-int-matrix?/alive (ccdoubles-int-matrix-initialise 3 4))
+    => #t)
+
+  (check	;single finalisation
+      (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
+  	(ccdoubles-int-matrix-finalise rmat))
+    => (void))
+
+  (check	;double finalisation
+      (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
+  	(ccdoubles-int-matrix-finalise rmat)
+  	(ccdoubles-int-matrix-finalise rmat))
+    => (void))
+
+  (check	;alive predicate after finalisation
+      (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
+  	(ccdoubles-int-matrix-finalise rmat)
+  	(ccdoubles-int-matrix?/alive rmat))
+    => #f)
+
+;;; --------------------------------------------------------------------
+;;; destructor
+
+  (check
+      (with-result
+	(let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
+	  (set-ccdoubles-int-matrix-custom-destructor! rmat (lambda (rmat)
+							      (add-result 123)))
+	  (ccdoubles-int-matrix-finalise rmat)))
+    => '(#!void (123)))
+
+;;; --------------------------------------------------------------------
+;;; hash
+
+  (check-for-true
+   (integer? (ccdoubles-int-matrix-hash (ccdoubles-int-matrix-initialise 3 4))))
+
+  (check
+      (let ((A (ccdoubles-int-matrix-initialise 3 4))
+	    (B (ccdoubles-int-matrix-initialise 3 4))
+	    (T (make-hashtable ccdoubles-int-matrix-hash eq?)))
+	(hashtable-set! T A 1)
+	(hashtable-set! T B 2)
+	(list (hashtable-ref T A #f)
+	      (hashtable-ref T B #f)))
+    => '(1 2))
+
+;;; --------------------------------------------------------------------
+;;; properties
+
+  (check
+      (let ((S (ccdoubles-int-matrix-initialise 3 4)))
+	(ccdoubles-int-matrix-property-list S))
+    => '())
+
+  (check
+      (let ((S (ccdoubles-int-matrix-initialise 3 4)))
+	(ccdoubles-int-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-int-matrix-getprop S 'ciao))
+    => 'salut)
+
+  (check
+      (let ((S (ccdoubles-int-matrix-initialise 3 4)))
+	(ccdoubles-int-matrix-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-int-matrix-initialise 3 4)))
+	(ccdoubles-int-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-int-matrix-remprop S 'ciao)
+	(ccdoubles-int-matrix-getprop S 'ciao))
+    => #f)
+
+  (check
+      (let ((S (ccdoubles-int-matrix-initialise 3 4)))
+	(ccdoubles-int-matrix-putprop S 'ciao 'salut)
+	(ccdoubles-int-matrix-putprop S 'hello 'ohayo)
+	(list (ccdoubles-int-matrix-getprop S 'ciao)
+	      (ccdoubles-int-matrix-getprop S 'hello)))
+    => '(salut ohayo))
+
+  (collect 'fullest))
+
+
 (parametrise ((check-test-name		'setters-getters)
 	      (struct-guardian-logger	#f))
+
+;;; real vectors
 
   (check
       (let ((rvec (ccdoubles-real-vector-initialise 3)))
@@ -451,6 +643,7 @@
     => 1.0 2.0 3.0)
 
 ;;; --------------------------------------------------------------------
+;;; complex vectors
 
   (check
       (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
@@ -463,6 +656,7 @@
     => 1.0+2.0i 2.0+3.0i 3.0+4.0i)
 
 ;;; --------------------------------------------------------------------
+;;; real matrices
 
   (check
       (let ((rmat (ccdoubles-real-matrix-initialise 3 3)))
@@ -487,6 +681,7 @@
     => 0.0 0.1 0.2   1.0 1.1 1.2   2.0 2.1 2.2)
 
 ;;; --------------------------------------------------------------------
+;;; complex matrices
 
   (check
       (let ((cmat (ccdoubles-cplx-matrix-initialise 3 3)))
@@ -509,6 +704,44 @@
 		(ccdoubles-cplx-matrix-ref cmat 2 1)
 		(ccdoubles-cplx-matrix-ref cmat 2 2)))
     => 0.0+9.0i 0.1+9.0i 0.2+9.0i   1.0+9.0i 1.1+9.0i 1.2+9.0i   2.0+9.0i 2.1+9.0i 2.2+9.0i)
+
+;;; --------------------------------------------------------------------
+;;; integer vectors
+
+  (check
+      (let ((rvec (ccdoubles-int-vector-initialise 3)))
+	(ccdoubles-int-vector-set! rvec 0 1)
+	(ccdoubles-int-vector-set! rvec 1 2)
+	(ccdoubles-int-vector-set! rvec 2 3)
+	(values (ccdoubles-int-vector-ref rvec 0)
+		(ccdoubles-int-vector-ref rvec 1)
+		(ccdoubles-int-vector-ref rvec 2)))
+    => 1 2 3)
+
+;;; --------------------------------------------------------------------
+;;; int matrices
+
+  (check
+      (let ((rmat (ccdoubles-int-matrix-initialise 3 3)))
+	(ccdoubles-int-matrix-set! rmat 0 0 1)
+	(ccdoubles-int-matrix-set! rmat 0 1 2)
+	(ccdoubles-int-matrix-set! rmat 0 2 3)
+	(ccdoubles-int-matrix-set! rmat 1 0 4)
+	(ccdoubles-int-matrix-set! rmat 1 1 5)
+	(ccdoubles-int-matrix-set! rmat 1 2 6)
+	(ccdoubles-int-matrix-set! rmat 2 0 7)
+	(ccdoubles-int-matrix-set! rmat 2 1 8)
+	(ccdoubles-int-matrix-set! rmat 2 2 9)
+	(values (ccdoubles-int-matrix-ref rmat 0 0)
+		(ccdoubles-int-matrix-ref rmat 0 1)
+		(ccdoubles-int-matrix-ref rmat 0 2)
+		(ccdoubles-int-matrix-ref rmat 1 0)
+		(ccdoubles-int-matrix-ref rmat 1 1)
+		(ccdoubles-int-matrix-ref rmat 1 2)
+		(ccdoubles-int-matrix-ref rmat 2 0)
+		(ccdoubles-int-matrix-ref rmat 2 1)
+		(ccdoubles-int-matrix-ref rmat 2 2)))
+    => 1 2 3  4 5 6  7 8 9)
 
   (collect))
 
@@ -559,6 +792,30 @@
 	       (ncols 3)
 	       (P (vector->ccdoubles-cplx-matrix nrows ncols vec))
 	       (V (ccdoubles-cplx-matrix->vector P)))
+	  V)
+      => vec))
+
+;;; --------------------------------------------------------------------
+;;; integer vectors
+
+  (let-syntax ((vec (identifier-syntax '#(1 3 5))))
+    (check
+	(let* ((P (vector->ccdoubles-int-vector vec))
+	       (V (ccdoubles-int-vector->vector P)))
+	  V)
+      => vec))
+
+;;; --------------------------------------------------------------------
+;;; int matrices
+
+  (let-syntax ((vec (identifier-syntax '#( ;;
+					  1 2 3
+					  4 5 6))))
+    (check
+	(let* ((nrows 2)
+	       (ncols 3)
+	       (P (vector->ccdoubles-int-matrix nrows ncols vec))
+	       (V (ccdoubles-int-matrix->vector P)))
 	  V)
       => vec))
 
