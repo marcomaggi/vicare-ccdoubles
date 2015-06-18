@@ -2924,35 +2924,35 @@ The following bindings are exported by the library
 
 
 @defun ccdoubles-real-vector-print @var{rvec}
-@defun ccdoubles-real-vector-print @var{rvec} @var{port}
+@defunx ccdoubles-real-vector-print @var{rvec} @var{port}
 Print @var{rvec} to @var{port}, which must be a textual output port.
 When not given: @var{port} defaults to the current output port.
 @end defun
 
 
 @defun ccdoubles-cplx-vector-print @var{cvec}
-@defun ccdoubles-cplx-vector-print @var{cvec} @var{port}
+@defunx ccdoubles-cplx-vector-print @var{cvec} @var{port}
 Print @var{cvec} to @var{port}, which must be a textual output port.
 When not given: @var{port} defaults to the current output port.
 @end defun
 
 
 @defun ccdoubles-real-matrix-print @var{rmat}
-@defun ccdoubles-real-matrix-print @var{rmat} @var{port}
+@defunx ccdoubles-real-matrix-print @var{rmat} @var{port}
 Print @var{rmat} to @var{port}, which must be a textual output port.
 When not given: @var{port} defaults to the current output port.
 @end defun
 
 
 @defun ccdoubles-cplx-matrix-print @var{cmat}
-@defun ccdoubles-cplx-matrix-print @var{cmat} @var{port}
+@defunx ccdoubles-cplx-matrix-print @var{cmat} @var{port}
 Print @var{cmat} to @var{port}, which must be a textual output port.
 When not given: @var{port} defaults to the current output port.
 @end defun
 
 
 @defun ccdoubles-print @var{O}
-@defun ccdoubles-print @var{O} @var{port}
+@defunx ccdoubles-print @var{O} @var{port}
 Print @var{O} to @var{port}, which must be a textual output port.  When
 not given: @var{port} defaults to the current output port.  @var{O} can
 be any among a real or complex vector or matrix.
