@@ -344,6 +344,12 @@
     ($make-cflonum (pointer-ref-c-double ptr real-offset)
 		   (pointer-ref-c-double ptr imag-offset))))
 
+(define* (%pointer-set-c-double-complex! {ptr pointer?} {idx non-negative-fixnum?} {val complex?})
+  (let* ((real-offset idx)
+	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
+    (pointer-set-c-double! ptr real-offset (inexact (real-part val)))
+    (pointer-set-c-double! ptr imag-offset (inexact (imag-part val)))))
+
 (define* (%array-ref-c-double-complex {ptr pointer?} {idx non-negative-fixnum?})
   (let* ((real-offset (* SIZEOF-DOUBLE-COMPLEX idx))
 	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
@@ -355,6 +361,70 @@
 	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
     (pointer-set-c-double! ptr real-offset (inexact (real-part val)))
     (pointer-set-c-double! ptr imag-offset (inexact (imag-part val)))))
+
+;;; --------------------------------------------------------------------
+
+;;Raw memory as data area.
+;;
+(begin
+
+  (define (data-area:alloc number-of-bytes)
+    (malloc number-of-bytes))
+
+  (define data-area:pointer-ref-double		pointer-ref-c-double)
+  (define data-area:pointer-set-double		pointer-set-c-double!)
+
+  (define data-area:array-ref-double		array-ref-c-double)
+  (define data-area:array-set-double		array-set-c-double!)
+
+  (define data-area:pointer-ref-double-complex	%pointer-ref-c-double-complex)
+  (define data-area:pointer-set-double-complex	%pointer-set-c-double-complex!)
+
+  (define data-area:array-ref-double-complex	%array-ref-c-double-complex)
+  (define data-area:array-set-double-complex	%array-set-c-double-complex!)
+
+  (define data-area:pointer-ref-int		pointer-ref-c-signed-int)
+  (define data-area:pointer-set-int		pointer-set-c-signed-int!)
+
+  (define data-area:array-ref-int		array-ref-c-signed-int)
+  (define data-area:array-set-int		array-set-c-signed-int!))
+
+;;Bytevector as data area.
+;;
+#|
+(begin
+
+  (define (data-area:alloc number-of-bytes)
+    (make-bytevector number-of-bytes))
+
+  (define data-area:pointer-ref-double		bytevector-ieee-double-native-ref)
+  (define data-area:pointer-set-double		bytevector-ieee-double-native-set!)
+
+  (define (data-area:array-ref-double ptr idx)
+    (data-area:pointer-ref-double ptr (* idx SIZEOF-INT)))
+  (define (data-area:array-set-double ptr idx val)
+    (data-area:pointer-set-double ptr (* idx SIZEOF-INT) val))
+
+  (define data-area:pointer-ref-double-complex	%pointer-ref-c-double-complex)
+  (define data-area:pointer-set-double-complex	%pointer-set-c-double-complex!)
+
+  (define (data-area:array-ref-double-complex ptr idx)
+    (data-area:pointer-ref-double-complex ptr (* idx SIZEOF-DOUBLE-COMPLEX)))
+  (define (data-area:array-set-double-complex ptr idx val)
+    (data-area:pointer-set-double-complex ptr (* idx SIZEOF-DOUBLE-COMPLEX) val))
+
+  (define (data-area:pointer-ref-int ptr idx)
+    (bytevector-sint-ref  ptr idx (endianness native) SIZEOF-INT))
+  (define (data-area:pointer-set-int ptr idx val)
+    (bytevector-sint-set! ptr idx val (endianness native) SIZEOF-INT))
+
+  (define (data-area:array-ref-int ptr idx)
+    (data-area:pointer-ref-int ptr (* idx SIZEOF-INT)))
+  (define (data-area:array-set-int ptr idx val)
+    (data-area:pointer-set-int ptr (* idx SIZEOF-INT) val))
+
+  #| end of begin |# )
+|#
 
 
 ;;;; constants
@@ -794,7 +864,7 @@
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-real-vector-initialise nslots)
-  (cond ((malloc (* nslots SIZEOF-DOUBLE))
+  (cond ((data-area:alloc (* nslots SIZEOF-DOUBLE))
 	 => (lambda (ptr)
 	      (make-ccdoubles-real-vector/owner ptr nslots)))
 	(else
@@ -830,7 +900,7 @@
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-cplx-vector-initialise nslots)
-  (cond ((malloc (* nslots SIZEOF-DOUBLE-COMPLEX))
+  (cond ((data-area:alloc (* nslots SIZEOF-DOUBLE-COMPLEX))
 	 => (lambda (ptr)
 	      (make-ccdoubles-cplx-vector/owner ptr nslots)))
 	(else
@@ -867,7 +937,7 @@
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-real-matrix-initialise nrows ncols)
-  (cond ((malloc (* nrows ncols SIZEOF-DOUBLE))
+  (cond ((data-area:alloc (* nrows ncols SIZEOF-DOUBLE))
 	 => (lambda (ptr)
 	      (make-ccdoubles-real-matrix/owner ptr nrows ncols)))
 	(else
@@ -904,7 +974,7 @@
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-cplx-matrix-initialise nrows ncols)
-  (cond ((malloc (* nrows ncols SIZEOF-DOUBLE-COMPLEX))
+  (cond ((data-area:alloc (* nrows ncols SIZEOF-DOUBLE-COMPLEX))
 	 => (lambda (ptr)
 	      (make-ccdoubles-cplx-matrix/owner ptr nrows ncols)))
 	(else
@@ -940,7 +1010,7 @@
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-int-vector-initialise nslots)
-  (cond ((malloc (* nslots SIZEOF-INT))
+  (cond ((data-area:alloc (* nslots SIZEOF-INT))
 	 => (lambda (ptr)
 	      (make-ccdoubles-int-vector/owner ptr nslots)))
 	(else
@@ -977,7 +1047,7 @@
 ;;; --------------------------------------------------------------------
 
 (define* (ccdoubles-int-matrix-initialise nrows ncols)
-  (cond ((malloc (* nrows ncols SIZEOF-DOUBLE))
+  (cond ((data-area:alloc (* nrows ncols SIZEOF-DOUBLE))
 	 => (lambda (ptr)
 	      (make-ccdoubles-int-matrix/owner ptr nrows ncols)))
 	(else
@@ -1000,7 +1070,7 @@
   ($ccdoubles-real-vector-ref rvec idx))
 
 (define ($ccdoubles-real-vector-ref rvec idx)
-  (array-ref-c-double ($ccdoubles-real-vector-pointer rvec) idx))
+  (data-area:array-ref-double ($ccdoubles-real-vector-pointer rvec) idx))
 
 ;;;
 
@@ -1009,7 +1079,7 @@
   ($ccdoubles-real-vector-set! rvec idx val))
 
 (define ($ccdoubles-real-vector-set! rvec idx val)
-  (array-set-c-double! ($ccdoubles-real-vector-pointer rvec) idx val))
+  (data-area:array-set-double ($ccdoubles-real-vector-pointer rvec) idx val))
 
 ;;; --------------------------------------------------------------------
 ;;; complex vectors
@@ -1019,7 +1089,7 @@
   ($ccdoubles-cplx-vector-ref rvec idx))
 
 (define ($ccdoubles-cplx-vector-ref rvec idx)
-  (%array-ref-c-double-complex ($ccdoubles-cplx-vector-pointer rvec) idx))
+  (data-area:array-ref-double-complex ($ccdoubles-cplx-vector-pointer rvec) idx))
 
 ;;;
 
@@ -1028,7 +1098,7 @@
   ($ccdoubles-cplx-vector-set! rvec idx val))
 
 (define ($ccdoubles-cplx-vector-set! rvec idx val)
-  (%array-set-c-double-complex! ($ccdoubles-cplx-vector-pointer rvec) idx val))
+  (data-area:array-set-double-complex ($ccdoubles-cplx-vector-pointer rvec) idx val))
 
 ;;; --------------------------------------------------------------------
 ;;; real matrices
@@ -1041,8 +1111,8 @@
   ($ccdoubles-real-matrix-ref rmat row col))
 
 (define ($ccdoubles-real-matrix-ref rmat row col)
-  (array-ref-c-double ($ccdoubles-real-matrix-pointer rmat)
-		      (+ col (* row ($ccdoubles-real-matrix-ncols rmat)))))
+  (data-area:array-ref-double ($ccdoubles-real-matrix-pointer rmat)
+			      (+ col (* row ($ccdoubles-real-matrix-ncols rmat)))))
 
 ;;;
 
@@ -1055,9 +1125,9 @@
   ($ccdoubles-real-matrix-set! rmat row col val))
 
 (define ($ccdoubles-real-matrix-set! rmat row col val)
-  (array-set-c-double! ($ccdoubles-real-matrix-pointer rmat)
-		       (+ col (* row ($ccdoubles-real-matrix-ncols rmat)))
-		       val))
+  (data-area:array-set-double ($ccdoubles-real-matrix-pointer rmat)
+			      (+ col (* row ($ccdoubles-real-matrix-ncols rmat)))
+			      val))
 
 ;;; --------------------------------------------------------------------
 ;;; complex matrices
@@ -1070,8 +1140,8 @@
   ($ccdoubles-cplx-matrix-ref rmat row col))
 
 (define ($ccdoubles-cplx-matrix-ref rmat row col)
-  (%array-ref-c-double-complex ($ccdoubles-cplx-matrix-pointer rmat)
-			       (+ col (* row ($ccdoubles-cplx-matrix-ncols rmat)))))
+  (data-area:array-ref-double-complex ($ccdoubles-cplx-matrix-pointer rmat)
+				      (+ col (* row ($ccdoubles-cplx-matrix-ncols rmat)))))
 
 ;;;
 
@@ -1084,9 +1154,9 @@
   ($ccdoubles-cplx-matrix-set! rmat row col val))
 
 (define ($ccdoubles-cplx-matrix-set! rmat row col val)
-  (%array-set-c-double-complex! ($ccdoubles-cplx-matrix-pointer rmat)
-				(+ col (* row ($ccdoubles-cplx-matrix-ncols rmat)))
-				val))
+  (data-area:array-set-double-complex ($ccdoubles-cplx-matrix-pointer rmat)
+				      (+ col (* row ($ccdoubles-cplx-matrix-ncols rmat)))
+				      val))
 
 ;;; --------------------------------------------------------------------
 ;;; integer vectors
@@ -1096,7 +1166,7 @@
   ($ccdoubles-int-vector-ref rvec idx))
 
 (define ($ccdoubles-int-vector-ref rvec idx)
-  (array-ref-c-signed-int ($ccdoubles-int-vector-pointer rvec) idx))
+  (data-area:array-ref-int ($ccdoubles-int-vector-pointer rvec) idx))
 
 ;;;
 
@@ -1105,7 +1175,7 @@
   ($ccdoubles-int-vector-set! rvec idx val))
 
 (define ($ccdoubles-int-vector-set! rvec idx val)
-  (array-set-c-signed-int! ($ccdoubles-int-vector-pointer rvec) idx val))
+  (data-area:array-set-int ($ccdoubles-int-vector-pointer rvec) idx val))
 
 ;;; --------------------------------------------------------------------
 ;;; integer matrices
@@ -1118,8 +1188,8 @@
   ($ccdoubles-int-matrix-ref rmat row col))
 
 (define ($ccdoubles-int-matrix-ref rmat row col)
-  (array-ref-c-signed-int ($ccdoubles-int-matrix-pointer rmat)
-			  (+ col (* row ($ccdoubles-int-matrix-ncols rmat)))))
+  (data-area:array-ref-int ($ccdoubles-int-matrix-pointer rmat)
+			   (+ col (* row ($ccdoubles-int-matrix-ncols rmat)))))
 
 ;;;
 
@@ -1132,7 +1202,7 @@
   ($ccdoubles-int-matrix-set! rmat row col val))
 
 (define ($ccdoubles-int-matrix-set! rmat row col val)
-  (array-set-c-signed-int! ($ccdoubles-int-matrix-pointer rmat)
+  (data-area:array-set-int ($ccdoubles-int-matrix-pointer rmat)
 			   (+ col (* row ($ccdoubles-int-matrix-ncols rmat)))
 			   val))
 
@@ -1149,7 +1219,7 @@
 	 (j 0 (fx+ j SIZEOF-DOUBLE)))
 	((>= i nslots)
 	 vec)
-      ($vector-set! vec i (pointer-ref-c-double ptr j)))))
+      ($vector-set! vec i (data-area:pointer-ref-double ptr j)))))
 
 (define* (vector->ccdoubles-real-vector {V vector?})
   (let* ((nslots (vector-length V))
@@ -1158,7 +1228,7 @@
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots)
 	 rvec)
-      (array-set-c-double! ptr i (inexact (vector-ref V i))))))
+      (data-area:array-set-double ptr i (inexact (vector-ref V i))))))
 
 ;;; --------------------------------------------------------------------
 ;;; complex vectors
@@ -1171,7 +1241,7 @@
 	 (j 0 (fx+ j SIZEOF-DOUBLE-COMPLEX)))
 	((>= i nslots)
 	 vec)
-      ($vector-set! vec i (%pointer-ref-c-double-complex ptr j)))))
+      ($vector-set! vec i (data-area:pointer-ref-double-complex ptr j)))))
 
 (define* (vector->ccdoubles-cplx-vector {V vector?})
   (define nslots (vector-length V))
@@ -1180,7 +1250,7 @@
     (do ((ptr ($ccdoubles-cplx-vector-pointer cvec))
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots))
-      (%array-set-c-double-complex! ptr i (inexact (vector-ref V i))))))
+      (data-area:array-set-double-complex ptr i (inexact (vector-ref V i))))))
 
 ;;; --------------------------------------------------------------------
 ;;; real matrices
@@ -1247,7 +1317,7 @@
 	 (j 0 (fx+ j SIZEOF-INT)))
 	((>= i nslots)
 	 vec)
-      ($vector-set! vec i (pointer-ref-c-signed-int ptr j)))))
+      ($vector-set! vec i (data-area:pointer-ref-int ptr j)))))
 
 (define* (vector->ccdoubles-int-vector {V vector?})
   (let* ((nslots (vector-length V))
@@ -1256,7 +1326,7 @@
 	 (i 0 (fxadd1 i)))
 	((fx=? i nslots)
 	 rvec)
-      (array-set-c-signed-int! ptr i (vector-ref V i)))))
+      (data-area:array-set-int ptr i (vector-ref V i)))))
 
 ;;; --------------------------------------------------------------------
 ;;; integer matrices
@@ -1672,7 +1742,7 @@
 						R
 						($ccdoubles-cplx-vector-pointer O1)
 						($ccdoubles-cplx-vector-pointer O2))
-    (%pointer-ref-c-double-complex R 0)))
+    (data-area:pointer-ref-double-complex R 0)))
 
 (define* (ccdoubles-cplx-vector-scalar-mul {R ccdoubles-cplx-vector?/alive}
 					   {L complex?}
