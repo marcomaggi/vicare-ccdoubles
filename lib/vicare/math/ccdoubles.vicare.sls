@@ -320,8 +320,8 @@
     ccdoubles-version-interface-current
     ccdoubles-version-interface-revision
     ccdoubles-version-interface-age)
-  (import (vicare (or (0 4 2015 5 (>= 26))
-		      (0 4 2015 (>= 6))
+  (import (vicare (or (0 4 2015 6 (>= 18))
+		      (0 4 2015 (>= 7))
 		      (0 4 (>= 2016))))
     (prefix (vicare ffi (or (0 4 2015 5 (>= 27))
 			    (0 4 2015 (>= 6))
@@ -338,32 +338,6 @@
 
 ;;;; helpers
 
-(define* (%pointer-ref-c-double-complex {ptr pointer?} {idx non-negative-fixnum?})
-  (let* ((real-offset idx)
-	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
-    ($make-cflonum (pointer-ref-c-double ptr real-offset)
-		   (pointer-ref-c-double ptr imag-offset))))
-
-(define* (%pointer-set-c-double-complex! {ptr pointer?} {idx non-negative-fixnum?} {val complex?})
-  (let* ((real-offset idx)
-	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
-    (pointer-set-c-double! ptr real-offset (inexact (real-part val)))
-    (pointer-set-c-double! ptr imag-offset (inexact (imag-part val)))))
-
-(define* (%array-ref-c-double-complex {ptr pointer?} {idx non-negative-fixnum?})
-  (let* ((real-offset (* SIZEOF-DOUBLE-COMPLEX idx))
-	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
-    ($make-cflonum (pointer-ref-c-double ptr real-offset)
-		   (pointer-ref-c-double ptr imag-offset))))
-
-(define* (%array-set-c-double-complex! {ptr pointer?} {idx non-negative-fixnum?} {val complex?})
-  (let* ((real-offset (* SIZEOF-DOUBLE-COMPLEX idx))
-	 (imag-offset (+ SIZEOF-DOUBLE real-offset)))
-    (pointer-set-c-double! ptr real-offset (inexact (real-part val)))
-    (pointer-set-c-double! ptr imag-offset (inexact (imag-part val)))))
-
-;;; --------------------------------------------------------------------
-
 ;;Raw memory as data area.
 ;;
 (begin
@@ -377,11 +351,11 @@
   (define data-area:array-ref-double		array-ref-c-double)
   (define data-area:array-set-double		array-set-c-double!)
 
-  (define data-area:pointer-ref-double-complex	%pointer-ref-c-double-complex)
-  (define data-area:pointer-set-double-complex	%pointer-set-c-double-complex!)
+  (define data-area:pointer-ref-double-complex	pointer-ref-c-double-complex)
+  (define data-area:pointer-set-double-complex	pointer-set-c-double-complex!)
 
-  (define data-area:array-ref-double-complex	%array-ref-c-double-complex)
-  (define data-area:array-set-double-complex	%array-set-c-double-complex!)
+  (define data-area:array-ref-double-complex	array-ref-c-double-complex)
+  (define data-area:array-set-double-complex	array-set-c-double-complex!)
 
   (define data-area:pointer-ref-int		pointer-ref-c-signed-int)
   (define data-area:pointer-set-int		pointer-set-c-signed-int!)
