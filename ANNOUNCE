@@ -1,4 +1,5 @@
-Subject: [announce] Vicare/CCDoubles revision 0.4d0
+﻿-*- coding: utf-8-with-signature-unix -*-
+Subject: [announce] Vicare/CCDoubles revision 0.4d1
 
 			    Vicare/CCDoubles
 			    ================
@@ -30,9 +31,15 @@ and as backup at:
       <https://bitbucket.org/marcomaggi/vicare-ccdoubles/downloads>
 
   The last  time the author  bothered to  update this paragraph,  he had
-tested CCDoubles version 0.1d2; the CCDoubles library is available at:
+tested CCDoubles version 0.2d0; the CCDoubles library is available at:
 
 	       <http://github.com/marcomaggi/ccdoubles/>
+
+
+Notes for revision 0.4d1
+------------------------
+
+* Ensure compatibility with Vicare Scheme 0.4d1.
 
 
 Notes for revision 0.4d0

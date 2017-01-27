@@ -7,7 +7,7 @@
 ;;;
 ;;;
 ;;;
-;;;Copyright (C) 2013, 2015 Marco Maggi <marco.maggi-ipsu@poste.it>
+;;;Copyright (C) 2013, 2015, 2017 Marco Maggi <marco.maggi-ipsu@poste.it>
 ;;;
 ;;;This program is free software:  you can redistribute it and/or modify
 ;;;it under the terms of the  GNU General Public License as published by
@@ -25,7 +25,8 @@
 
 
 #!vicare
-(library (vicare math ccdoubles (0 4 2015 6 17))
+(library (vicare math ccdoubles (0 4 2017 1 27))
+  (options typed-language)
   (export
 
     ;; real vectors struct
@@ -320,15 +321,14 @@
     ccdoubles-version-interface-current
     ccdoubles-version-interface-revision
     ccdoubles-version-interface-age)
-  (import (vicare (or (0 4 2015 6 (>= 18))
-		      (0 4 2015 (>= 7))
-		      (0 4 (>= 2016))))
+  (import (vicare (0 4 2017 1 (>= 10)))
+    (prefix (vicare system structs) structs::)
     (prefix (vicare ffi (or (0 4 2015 5 (>= 27))
 			    (0 4 2015 (>= 6))
 			    (0 4 (>= 2016))))
-	    ffi.)
-    (prefix (vicare ffi foreign-pointer-wrapper) ffi.)
-    (prefix (vicare platform words) words.)
+	    ffi::)
+    (prefix (vicare ffi foreign-pointer-wrapper) ffi::)
+    (prefix (vicare platform words) words::)
     (vicare system $fx)
     (vicare system $flonums)
     (vicare system $compnums)
@@ -404,10 +404,10 @@
 ;;;; constants
 
 (define-constant SIZEOF-INT
-  words.SIZEOF_INT)
+  words::SIZEOF_INT)
 
 (define-constant SIZEOF-DOUBLE
-  words.SIZEOF_DOUBLE)
+  words::SIZEOF_DOUBLE)
 
 (define-constant SIZEOF-DOUBLE-COMPLEX
   (* 2 SIZEOF-DOUBLE))
@@ -818,13 +818,13 @@
 
 ;;;; real vector data type
 
-(ffi.define-foreign-pointer-wrapper ccdoubles-real-vector
-  (ffi.fields nslots)
-  (ffi.foreign-destructor $ccdoubles-real-vector-free)
-  (ffi.collector-struct-type #f))
+(ffi::define-foreign-pointer-wrapper ccdoubles-real-vector
+  (ffi::fields nslots)
+  (ffi::foreign-destructor $ccdoubles-real-vector-free)
+  (ffi::collector-struct-type #f))
 
 (module ()
-  (set-rtd-printer! (type-descriptor ccdoubles-real-vector)
+  (structs::set-struct-type-printer! (type-descriptor ccdoubles-real-vector)
     (lambda (S port sub-printer)
       (define-inline (%display thing)
 	(display thing port))
@@ -846,21 +846,22 @@
 
 (define* (ccdoubles-real-vector-finalise {rvec ccdoubles-real-vector?})
   ($ccdoubles-real-vector-finalise rvec)
-  (void))
+  (values))
 
 (define ($ccdoubles-real-vector-free rvec)
-  (free ($ccdoubles-real-vector-pointer rvec)))
+  (free ($ccdoubles-real-vector-pointer rvec))
+  #t)
 
 
 ;;;; cplx vector data type
 
-(ffi.define-foreign-pointer-wrapper ccdoubles-cplx-vector
-  (ffi.fields nslots)
-  (ffi.foreign-destructor $ccdoubles-cplx-vector-free)
-  (ffi.collector-struct-type #f))
+(ffi::define-foreign-pointer-wrapper ccdoubles-cplx-vector
+  (ffi::fields nslots)
+  (ffi::foreign-destructor $ccdoubles-cplx-vector-free)
+  (ffi::collector-struct-type #f))
 
 (module ()
-  (set-rtd-printer! (type-descriptor ccdoubles-cplx-vector)
+  (structs::set-struct-type-printer! (type-descriptor ccdoubles-cplx-vector)
     (lambda (S port sub-printer)
       (define-inline (%display thing)
 	(display thing port))
@@ -882,21 +883,22 @@
 
 (define* (ccdoubles-cplx-vector-finalise {rvec ccdoubles-cplx-vector?})
   ($ccdoubles-cplx-vector-finalise rvec)
-  (void))
+  (values))
 
 (define ($ccdoubles-cplx-vector-free rvec)
-  (free ($ccdoubles-cplx-vector-pointer rvec)))
+  (free ($ccdoubles-cplx-vector-pointer rvec))
+  #t)
 
 
 ;;;; real matrix data type
 
-(ffi.define-foreign-pointer-wrapper ccdoubles-real-matrix
-  (ffi.fields nrows ncols)
-  (ffi.foreign-destructor $ccdoubles-real-matrix-free)
-  (ffi.collector-struct-type #f))
+(ffi::define-foreign-pointer-wrapper ccdoubles-real-matrix
+  (ffi::fields nrows ncols)
+  (ffi::foreign-destructor $ccdoubles-real-matrix-free)
+  (ffi::collector-struct-type #f))
 
 (module ()
-  (set-rtd-printer! (type-descriptor ccdoubles-real-matrix)
+  (structs::set-struct-type-printer! (type-descriptor ccdoubles-real-matrix)
     (lambda (S port sub-printer)
       (define-inline (%display thing)
 	(display thing port))
@@ -919,21 +921,22 @@
 
 (define* (ccdoubles-real-matrix-finalise {rmat ccdoubles-real-matrix?})
   ($ccdoubles-real-matrix-finalise rmat)
-  (void))
+  (values))
 
 (define ($ccdoubles-real-matrix-free rmat)
-  (free ($ccdoubles-real-matrix-pointer rmat)))
+  (free ($ccdoubles-real-matrix-pointer rmat))
+  #t)
 
 
 ;;;; cplx matrix data type
 
-(ffi.define-foreign-pointer-wrapper ccdoubles-cplx-matrix
-  (ffi.fields nrows ncols)
-  (ffi.foreign-destructor $ccdoubles-cplx-matrix-free)
-  (ffi.collector-struct-type #f))
+(ffi::define-foreign-pointer-wrapper ccdoubles-cplx-matrix
+  (ffi::fields nrows ncols)
+  (ffi::foreign-destructor $ccdoubles-cplx-matrix-free)
+  (ffi::collector-struct-type #f))
 
 (module ()
-  (set-rtd-printer! (type-descriptor ccdoubles-cplx-matrix)
+  (structs::set-struct-type-printer! (type-descriptor ccdoubles-cplx-matrix)
     (lambda (S port sub-printer)
       (define-inline (%display thing)
 	(display thing port))
@@ -956,21 +959,22 @@
 
 (define* (ccdoubles-cplx-matrix-finalise {rmat ccdoubles-cplx-matrix?})
   ($ccdoubles-cplx-matrix-finalise rmat)
-  (void))
+  (values))
 
 (define ($ccdoubles-cplx-matrix-free rmat)
-  (free ($ccdoubles-cplx-matrix-pointer rmat)))
+  (free ($ccdoubles-cplx-matrix-pointer rmat))
+  #t)
 
 
 ;;;; int vector data type
 
-(ffi.define-foreign-pointer-wrapper ccdoubles-int-vector
-  (ffi.fields nslots)
-  (ffi.foreign-destructor $ccdoubles-int-vector-free)
-  (ffi.collector-struct-type #f))
+(ffi::define-foreign-pointer-wrapper ccdoubles-int-vector
+  (ffi::fields nslots)
+  (ffi::foreign-destructor $ccdoubles-int-vector-free)
+  (ffi::collector-struct-type #f))
 
 (module ()
-  (set-rtd-printer! (type-descriptor ccdoubles-int-vector)
+  (structs::set-struct-type-printer! (type-descriptor ccdoubles-int-vector)
     (lambda (S port sub-printer)
       (define-inline (%display thing)
 	(display thing port))
@@ -992,21 +996,22 @@
 
 (define* (ccdoubles-int-vector-finalise {rvec ccdoubles-int-vector?})
   ($ccdoubles-int-vector-finalise rvec)
-  (void))
+  (values))
 
 (define ($ccdoubles-int-vector-free rvec)
-  (free ($ccdoubles-int-vector-pointer rvec)))
+  (free ($ccdoubles-int-vector-pointer rvec))
+  #t)
 
 
 ;;;; int matrix data type
 
-(ffi.define-foreign-pointer-wrapper ccdoubles-int-matrix
-  (ffi.fields nrows ncols)
-  (ffi.foreign-destructor $ccdoubles-int-matrix-free)
-  (ffi.collector-struct-type #f))
+(ffi::define-foreign-pointer-wrapper ccdoubles-int-matrix
+  (ffi::fields nrows ncols)
+  (ffi::foreign-destructor $ccdoubles-int-matrix-free)
+  (ffi::collector-struct-type #f))
 
 (module ()
-  (set-rtd-printer! (type-descriptor ccdoubles-int-matrix)
+  (structs::set-struct-type-printer! (type-descriptor ccdoubles-int-matrix)
     (lambda (S port sub-printer)
       (define-inline (%display thing)
 	(display thing port))
@@ -1029,10 +1034,11 @@
 
 (define* (ccdoubles-int-matrix-finalise {rmat ccdoubles-int-matrix?})
   ($ccdoubles-int-matrix-finalise rmat)
-  (void))
+  (values))
 
 (define ($ccdoubles-int-matrix-free rmat)
-  (free ($ccdoubles-int-matrix-pointer rmat)))
+  (free ($ccdoubles-int-matrix-pointer rmat))
+  #t)
 
 
 ;;;; setters and getters
@@ -1144,7 +1150,7 @@
 
 ;;;
 
-(define* (ccdoubles-int-vector-set! {rvec ccdoubles-int-vector?/alive} {idx ccdoubles-int-vector-index?} {val words.signed-int?})
+(define* (ccdoubles-int-vector-set! {rvec ccdoubles-int-vector?/alive} {idx ccdoubles-int-vector-index?} {val words::signed-int?})
   (ccdoubles-int-vector-and-index rvec idx)
   ($ccdoubles-int-vector-set! rvec idx val))
 
@@ -1170,7 +1176,7 @@
 (define* (ccdoubles-int-matrix-set! {rmat ccdoubles-int-matrix?/alive}
 				    {row ccdoubles-int-matrix-row-index?}
 				    {col ccdoubles-int-matrix-col-index?}
-				    {val words.signed-int?})
+				    {val words::signed-int?})
   (ccdoubles-int-matrix-and-row-index rmat row)
   (ccdoubles-int-matrix-and-col-index rmat col)
   ($ccdoubles-int-matrix-set! rmat row col val))

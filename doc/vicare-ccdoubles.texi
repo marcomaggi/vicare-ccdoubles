@@ -33,15 +33,14 @@
 
 @c To be used as @value{COPYRIGHT_YEARS} whenever we need to include the
 @c list of copyright years.
-@set COPYRIGHT_YEARS            2015
+@set COPYRIGHT_YEARS            2015, 2017
 
 @c ------------------------------------------------------------
 
 @set FOREIGN_PACKAGE            @ccdoubles{}
-@set FOREIGN_VERSION            0.1d2
+@set FOREIGN_VERSION            0.2d0
 @set FOREIGN_URL                @url{http://github.com/marcomaggi/ccdoubles}
 @set FOREIGN_SCHEME_LIB         @library{vicare math ccdoubles}
-@c @set NAUSICAA_SCHEME_LIB        @library{nausicaa math ccdoubles}
 @set GITHUB_URL                 @url{http://github.com/marcomaggi/@value{PACKAGE_NICKNAME}}
 @set BITBUCKET_URL              @url{https://bitbucket.org/marcomaggi/@value{PACKAGE_NICKNAME}}
 @set DOWNLOAD_URL               @url{https://bitbucket.org/marcomaggi/@value{PACKAGE_NICKNAME}/downloads}

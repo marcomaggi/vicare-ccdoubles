@@ -1,3 +1,4 @@
+﻿-*- coding: utf-8-with-signature-unix -*-
 
 			    Vicare/CCDoubles
 			    ================
@@ -24,7 +25,7 @@ CCDoubles C language library.  Vicare/CCDoubles makes use of the Foreign
 Functions Interface (FFI) provided by Vicare Scheme.
 
   The last  time the author  bothered to  update this paragraph,  he had
-tested CCDoubles version 0.1d2.
+tested CCDoubles version 0.2d0.
 
   This package makes use of the GNU Autotools.
 
@@ -32,7 +33,7 @@ tested CCDoubles version 0.1d2.
 2. License
 ----------
 
-Copyright (c) 2013-2015 Marco Maggi <marco.maggi-ipsu@poste.it>
+Copyright (c) 2013-2015, 2017 Marco Maggi <marco.maggi-ipsu@poste.it>
 
 This program is free software: you  can redistribute it and/or modify it
 under the  terms of the GNU  General Public License as  published by the

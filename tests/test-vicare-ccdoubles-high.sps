@@ -8,7 +8,7 @@
 ;;;
 ;;;
 ;;;
-;;;Copyright (C) 2015 Marco Maggi <marco.maggi-ipsu@poste.it>
+;;;Copyright (C) 2015, 2017 Marco Maggi <marco.maggi-ipsu@poste.it>
 ;;;
 ;;;This program is free software:  you can redistribute it and/or modify
 ;;;it under the terms of the  GNU General Public License as published by
@@ -26,11 +26,12 @@
 
 
 #!vicare
-(import (vicare)
-  (vicare math ccdoubles)
-  (prefix (vicare ffi) ffi.)
-  (prefix (vicare platform words) words.)
-  (vicare checks))
+(program (test-vicare-ccdoubles-high)
+  (options typed-language)
+  (import (vicare)
+    (prefix (vicare system structs) structs::)
+    (vicare math ccdoubles)
+    (vicare checks))
 
 (check-set-mode! 'report-failed)
 (check-display "*** testing Vicare CCDoubles bindings\n")
@@ -48,6 +49,13 @@
 		   (Y (vector-ref O2 i)))
 	       (< (magnitude (- X Y)) EPSILON))
 	     (loop (fxadd1 i))))))
+
+(define-syntax no-values
+  (syntax-rules ()
+    ((_ ?expr)
+     (receive ()
+	 ?expr
+       #t))))
 
 
 (parametrise ((check-test-name	'version))
@@ -72,7 +80,7 @@
 
 
 (parametrise ((check-test-name		'real-vector-struct)
-	      (struct-guardian-logger	#t))
+	      (structs::struct-guardian-logger	#t))
 
   (define who 'test)
 
@@ -87,14 +95,16 @@
 
   (check	;single finalisation
       (let ((rvec (ccdoubles-real-vector-initialise 3)))
-  	(ccdoubles-real-vector-finalise rvec))
-    => (void))
+  	(receive ()
+	    (ccdoubles-real-vector-finalise rvec)
+	  #t))
+    => #t)
 
   (check	;double finalisation
       (let ((rvec (ccdoubles-real-vector-initialise 3)))
   	(ccdoubles-real-vector-finalise rvec)
-  	(ccdoubles-real-vector-finalise rvec))
-    => (void))
+  	(no-values (ccdoubles-real-vector-finalise rvec)))
+    => #t)
 
   (check	;alive predicate after finalisation
       (let ((rvec (ccdoubles-real-vector-initialise 3)))
@@ -110,8 +120,8 @@
 	(let ((rvec (ccdoubles-real-vector-initialise 3)))
 	  (set-ccdoubles-real-vector-custom-destructor! rvec (lambda (rvec)
 							       (add-result 123)))
-	  (ccdoubles-real-vector-finalise rvec)))
-    => '(#!void (123)))
+	  (no-values (ccdoubles-real-vector-finalise rvec))))
+    => '(#t (123)))
 
 ;;; --------------------------------------------------------------------
 ;;; hash
@@ -167,7 +177,7 @@
 
 
 (parametrise ((check-test-name		'cplx-vector-struct)
-	      (struct-guardian-logger	#t))
+	      (structs::struct-guardian-logger	#t))
 
   (define who 'test)
 
@@ -182,14 +192,14 @@
 
   (check	;single finalisation
       (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
-  	(ccdoubles-cplx-vector-finalise cvec))
-    => (void))
+  	(no-values (ccdoubles-cplx-vector-finalise cvec)))
+    => #t)
 
   (check	;double finalisation
       (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
   	(ccdoubles-cplx-vector-finalise cvec)
-  	(ccdoubles-cplx-vector-finalise cvec))
-    => (void))
+  	(no-values (ccdoubles-cplx-vector-finalise cvec)))
+    => #t)
 
   (check	;alive predicate after finalisation
       (let ((cvec (ccdoubles-cplx-vector-initialise 3)))
@@ -205,8 +215,8 @@
 	(let ((cvec (ccdoubles-cplx-vector-initialise 3)))
 	  (set-ccdoubles-cplx-vector-custom-destructor! cvec (lambda (cvec)
 							       (add-result 123)))
-	  (ccdoubles-cplx-vector-finalise cvec)))
-    => '(#!void (123)))
+	  (no-values (ccdoubles-cplx-vector-finalise cvec))))
+    => '(#t (123)))
 
 ;;; --------------------------------------------------------------------
 ;;; hash
@@ -262,7 +272,7 @@
 
 
 (parametrise ((check-test-name		'real-matrix-struct)
-	      (struct-guardian-logger	#t))
+	      (structs::struct-guardian-logger	#t))
 
   (define who 'test)
 
@@ -277,14 +287,14 @@
 
   (check	;single finalisation
       (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
-  	(ccdoubles-real-matrix-finalise rmat))
-    => (void))
+  	(no-values (ccdoubles-real-matrix-finalise rmat)))
+    => #t)
 
   (check	;double finalisation
       (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
   	(ccdoubles-real-matrix-finalise rmat)
-  	(ccdoubles-real-matrix-finalise rmat))
-    => (void))
+  	(no-values (ccdoubles-real-matrix-finalise rmat)))
+    => #t)
 
   (check	;alive predicate after finalisation
       (let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
@@ -300,8 +310,8 @@
 	(let ((rmat (ccdoubles-real-matrix-initialise 3 4)))
 	  (set-ccdoubles-real-matrix-custom-destructor! rmat (lambda (rmat)
 							       (add-result 123)))
-	  (ccdoubles-real-matrix-finalise rmat)))
-    => '(#!void (123)))
+	  (no-values (ccdoubles-real-matrix-finalise rmat))))
+    => '(#t (123)))
 
 ;;; --------------------------------------------------------------------
 ;;; hash
@@ -357,7 +367,7 @@
 
 
 (parametrise ((check-test-name		'cplx-matrix-struct)
-	      (struct-guardian-logger	#t))
+	      (structs::struct-guardian-logger	#t))
 
   (define who 'test)
 
@@ -372,14 +382,14 @@
 
   (check	;single finalisation
       (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
-  	(ccdoubles-cplx-matrix-finalise cmat))
-    => (void))
+  	(no-values (ccdoubles-cplx-matrix-finalise cmat)))
+    => #t)
 
   (check	;double finalisation
       (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
   	(ccdoubles-cplx-matrix-finalise cmat)
-  	(ccdoubles-cplx-matrix-finalise cmat))
-    => (void))
+  	(no-values (ccdoubles-cplx-matrix-finalise cmat)))
+    => #t)
 
   (check	;alive predicate after finalisation
       (let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
@@ -395,8 +405,8 @@
 	(let ((cmat (ccdoubles-cplx-matrix-initialise 3 4)))
 	  (set-ccdoubles-cplx-matrix-custom-destructor! cmat (lambda (cmat)
 							       (add-result 123)))
-	  (ccdoubles-cplx-matrix-finalise cmat)))
-    => '(#!void (123)))
+	  (no-values (ccdoubles-cplx-matrix-finalise cmat))))
+    => '(#t (123)))
 
 ;;; --------------------------------------------------------------------
 ;;; hash
@@ -452,7 +462,7 @@
 
 
 (parametrise ((check-test-name		'int-vector-struct)
-	      (struct-guardian-logger	#t))
+	      (structs::struct-guardian-logger	#t))
 
   (define who 'test)
 
@@ -467,14 +477,14 @@
 
   (check	;single finalisation
       (let ((rvec (ccdoubles-int-vector-initialise 3)))
-  	(ccdoubles-int-vector-finalise rvec))
-    => (void))
+  	(no-values (ccdoubles-int-vector-finalise rvec)))
+    => #t)
 
   (check	;double finalisation
       (let ((rvec (ccdoubles-int-vector-initialise 3)))
   	(ccdoubles-int-vector-finalise rvec)
-  	(ccdoubles-int-vector-finalise rvec))
-    => (void))
+  	(no-values (ccdoubles-int-vector-finalise rvec)))
+    => #t)
 
   (check	;alive predicate after finalisation
       (let ((rvec (ccdoubles-int-vector-initialise 3)))
@@ -490,8 +500,8 @@
 	(let ((rvec (ccdoubles-int-vector-initialise 3)))
 	  (set-ccdoubles-int-vector-custom-destructor! rvec (lambda (rvec)
 							      (add-result 123)))
-	  (ccdoubles-int-vector-finalise rvec)))
-    => '(#!void (123)))
+	  (no-values (ccdoubles-int-vector-finalise rvec))))
+    => '(#t (123)))
 
 ;;; --------------------------------------------------------------------
 ;;; hash
@@ -547,7 +557,7 @@
 
 
 (parametrise ((check-test-name		'int-matrix-struct)
-	      (struct-guardian-logger	#t))
+	      (structs::struct-guardian-logger	#t))
 
   (define who 'test)
 
@@ -562,14 +572,14 @@
 
   (check	;single finalisation
       (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
-  	(ccdoubles-int-matrix-finalise rmat))
-    => (void))
+  	(no-values (ccdoubles-int-matrix-finalise rmat)))
+    => #t)
 
   (check	;double finalisation
       (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
   	(ccdoubles-int-matrix-finalise rmat)
-  	(ccdoubles-int-matrix-finalise rmat))
-    => (void))
+  	(no-values (ccdoubles-int-matrix-finalise rmat)))
+    => #t)
 
   (check	;alive predicate after finalisation
       (let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
@@ -585,8 +595,8 @@
 	(let ((rmat (ccdoubles-int-matrix-initialise 3 4)))
 	  (set-ccdoubles-int-matrix-custom-destructor! rmat (lambda (rmat)
 							      (add-result 123)))
-	  (ccdoubles-int-matrix-finalise rmat)))
-    => '(#!void (123)))
+	  (no-values (ccdoubles-int-matrix-finalise rmat))))
+    => '(#t (123)))
 
 ;;; --------------------------------------------------------------------
 ;;; hash
@@ -642,7 +652,7 @@
 
 
 (parametrise ((check-test-name		'setters-getters)
-	      (struct-guardian-logger	#f))
+	      (structs::struct-guardian-logger	#f))
 
 ;;; real vectors
 
@@ -761,7 +771,7 @@
 
 
 (parametrise ((check-test-name		'conversion)
-	      (struct-guardian-logger	#f))
+	      (structs::struct-guardian-logger	#f))
 
 ;;; real vectors
 
@@ -1180,5 +1190,7 @@
 
 (collect 'fullest)
 (check-report)
+
+#| end of program |# )
 
 ;;; end of file

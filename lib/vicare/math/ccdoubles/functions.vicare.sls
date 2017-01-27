@@ -7,7 +7,7 @@
 ;;;
 ;;;
 ;;;
-;;;Copyright (C) 2015 Marco Maggi <marco.maggi-ipsu@poste.it>
+;;;Copyright (C) 2015, 2017 Marco Maggi <marco.maggi-ipsu@poste.it>
 ;;;
 ;;;This program is free software: you can  redistribute it and/or modify it under the
 ;;;terms  of  the GNU  General  Public  License as  published  by  the Free  Software
@@ -230,13 +230,12 @@
     ccdoubles_version_interface_current
     ccdoubles_version_interface_revision
     ccdoubles_version_interface_age)
-  (import (vicare (or (0 4 2015 5 (>= 26))
-		      (0 4 2015 (>= 6))
-		      (0 4 (>= 2016))))
+  (import (vicare (0 4 2017 1 (>= 10)))
+    (prefix (vicare expander) xp::)
     (prefix (vicare ffi (or (0 4 2015 5 (>= 27))
 			    (0 4 2015 (>= 6))
 			    (0 4 (>= 2016))))
-	    ffi.))
+	    ffi::))
 
 
 ;;;; helpers
@@ -250,11 +249,11 @@
 	    (RETVAL-TYPE	(%external-type-id->internal-type-id #'?retval-type))
 	    (FUNC-NAME		(symbol->string (syntax->datum #'?c-function-name)))
 	    ((ARG-TYPES ...)	(map %external-type-id->internal-type-id
-				  (syntax->list #'(?arg-type ...)))))
+				  (xp::syntax->list #'(?arg-type ...)))))
 	 #'(define ?c-function-name
-	     ((ffi.make-c-callout-maker (quote RETVAL-TYPE)
+	     ((ffi::make-c-callout-maker (quote RETVAL-TYPE)
 					(quote (ARG-TYPES ...)))
-	      (ffi.dlsym LIBTOKEN FUNC-NAME)))))))
+	      (ffi::dlsym LIBTOKEN FUNC-NAME)))))))
 
   (define (%external-type-id->internal-type-id type-id)
     (datum->syntax type-id
@@ -280,7 +279,7 @@
 ;;;; loading native shared object
 
 (define libtoken
-  (ffi.open-shared-object "libccdoubles.so"))
+  (ffi::open-shared-object "libccdoubles.so"))
 
 
 ;;;; version functions

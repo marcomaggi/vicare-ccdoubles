@@ -2,7 +2,7 @@ dnl @configure_input@
 dnl
 
 AC_PREREQ([2.68])
-AC_INIT([Vicare/CCDoubles],[0.4d0],[marco.maggi-ipsu@poste.it],
+AC_INIT([Vicare/CCDoubles],[0.4d1],[marco.maggi-ipsu@poste.it],
   [vicare-ccdoubles],[http://marcomaggi.github.io/vicare.html])
 AC_CONFIG_SRCDIR([lib/vicare/math/ccdoubles.vicare.sls])
 AC_CONFIG_MACRO_DIR([meta/autotools])
@@ -28,6 +28,7 @@ AC_DEFINE([_GNU_SOURCE],[1],[enable everything GNU])
 dnl --------------------------------------------------------------------
 
 VICARE_SCHEME
+VICARE_CHECK_LIBRARY([VICARE],[(vicare (0 4 2017 1 (>= 10)))])
 VICARE_CHECK_LIBRARY([VICARE],
   [(vicare (or (0 4 2015 6 (>= 18))
                (0 4 2015 (>= 7))
@@ -91,7 +92,7 @@ AM_COND_IF([WANT_TIME_TESTS],
 #page
 #### CCDoubles configuration
 
-PKG_CHECK_MODULES([CCDOUBLES],[ccdoubles >= 0.1],[ccdoubles=yes],[ccdoubles=no])
+PKG_CHECK_MODULES([CCDOUBLES],[ccdoubles >= 0.2],[ccdoubles=yes],[ccdoubles=no])
 
 dnl CCDOUBLES_CPPFLAGS=$(pkg-config libccdoubles --cflags)
 dnl CCDOUBLES_LDFLAGS=$(pkg-config libccdoubles --libs)
